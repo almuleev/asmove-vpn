@@ -1,0 +1,363 @@
+{
+  "source_revision": "6a79c1d46abba7d44c74df927ac5512bcddb7503",
+  "files": [
+    {
+      "path": "app/access_term.py",
+      "upstream_sha256": "47fc9ca9881262a6d44bd456a1bccf5110f83223689f860357ebe860f8825390"
+    },
+    {
+      "path": "app/admin_relay.py",
+      "upstream_sha256": "651a8ea935678c4ad0fb45add79e0c12e3f9e7db20825685b58e9e72697a73f8"
+    },
+    {
+      "path": "app/auth.py",
+      "upstream_sha256": "b7eb88b23f934f183d8f4ba7b2f5805516c3f8f26687c7900c4ebeb89b7532fc"
+    },
+    {
+      "path": "app/cli.py",
+      "upstream_sha256": "c6c01bde7332f0be8f63cfdc3145e1fb89742b09ac1e55d51461a1631aea2f08"
+    },
+    {
+      "path": "app/db.py",
+      "upstream_sha256": "6a8b79a3a4efeb2403a56fc67231a4bf7868208a5cd246649d8fbc550493b24b"
+    },
+    {
+      "path": "app/delete_first.py",
+      "upstream_sha256": "d9e9754a74f24a219a93449d84f5b81a3a797dccb04a6dc7f80b4054cac0bca0"
+    },
+    {
+      "path": "app/events.py",
+      "upstream_sha256": "1fe8613ae5c93d3170ae8e504b71430bf81b3a491694094684b529b8013a1cc2"
+    },
+    {
+      "path": "app/infrastructure.py",
+      "upstream_sha256": "53e7eaa2e6a05101d000ed63661ebcf2635e9bafef2ded1922a228e66d089d36"
+    },
+    {
+      "path": "app/main.py",
+      "upstream_sha256": "128c0853984c2f3beb6dda06abed6b9c01e71edc54b1c8b79b064dc443d37bf4"
+    },
+    {
+      "path": "app/node_migration.py",
+      "upstream_sha256": "2f14a11dadb4d3d41a775163e1eef84f423252ab524b30554fc4b706ca8de37e"
+    },
+    {
+      "path": "app/ntfy.py",
+      "upstream_sha256": "59dc658e363d7f539067fd7c6830d3ff8d5b4164774937fdb19e66c75682e1c5"
+    },
+    {
+      "path": "app/password_vault.py",
+      "upstream_sha256": "63629b8c262f45e4c3de41fff3fca865176a804bc307db7ca839147561c24b3a"
+    },
+    {
+      "path": "app/problem_reports.py",
+      "upstream_sha256": "42365aa467cd8e62f98779fcb7b1d80ed3debfec3577b97f59b3c5e0588a6ccd"
+    },
+    {
+      "path": "app/reminders.py",
+      "upstream_sha256": "364c04af57d143746da01fe0b138b2d0d59ad3295159708bf58f8644a9e8c3c8"
+    },
+    {
+      "path": "app/reserve.py",
+      "upstream_sha256": "4b7c2c48f0011c6f68121ce18e158d51cc9a38e04c1618e98a73a379081c9aa6"
+    },
+    {
+      "path": "app/settings.py",
+      "upstream_sha256": "afa647c9a6725c99e23e48dc6fad941eff0b3831c5e04de29016c26fc3100407"
+    },
+    {
+      "path": "app/subscriptions.py",
+      "upstream_sha256": "a6e48cb5926c8b764e9958f00af72ac9eafff5ca97079d60414b303fc2e67e07"
+    },
+    {
+      "path": "app/sync.py",
+      "upstream_sha256": "7ba5b19a764de132bddcad800e70d894e643d19d4c6438cd4896839fe101d69c"
+    },
+    {
+      "path": "app/vdsina.py",
+      "upstream_sha256": "3ddaf56ac500746cd66d7e681291eeb4be8d3dcddac6be100332fbbac6c23d15"
+    },
+    {
+      "path": "app/xui.py",
+      "upstream_sha256": "14f52eebe5cf5a41791d5fdbe7586224158e42a5dee9070b37dcad62eb579a13"
+    },
+    {
+      "path": "app/__init__.py",
+      "upstream_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "app/templates/admin.html",
+      "upstream_sha256": "0fd85933fb0906d2a1ef3fae8d8b7d70fa4c38f51ebebec358dfa6f172e57d64"
+    },
+    {
+      "path": "app/templates/base.html",
+      "upstream_sha256": "6fb8723deea976ad7705b885ace76123c1e1311aff4802518c914bf1baeeb9d9"
+    },
+    {
+      "path": "app/templates/cabinet.html",
+      "upstream_sha256": "6df734d9fe272ea02fb26d3c8ffd4216cd6b7bd697af06a762981ca4e0a6d53f"
+    },
+    {
+      "path": "app/templates/connection_guides.html",
+      "upstream_sha256": "779ebb9cce987f9a04ff3a8cac7fe745c6aa6ab9ade13fd984421715e4d0df12"
+    },
+    {
+      "path": "app/templates/error.html",
+      "upstream_sha256": "2700a3e8e27667837a99ff03977021462bb0218966440162a552bfe6067aac39"
+    },
+    {
+      "path": "app/templates/infrastructure.html",
+      "upstream_sha256": "b0df3f95c720263bd34631c34ccaf0e3e12bdfaa3d67ecdcbfd085c5324b0b0b"
+    },
+    {
+      "path": "app/templates/login.html",
+      "upstream_sha256": "3768e605df5e2aecb6b3c1eb10dc65f50f2c222dc369586bac5277eb1c4b85fd"
+    },
+    {
+      "path": "app/templates/macros.html",
+      "upstream_sha256": "51f389bc4708c33a168141635eaf81e69a9f6ec93378f3f2bbabeedceaf7d07f"
+    },
+    {
+      "path": "app/templates/password.html",
+      "upstream_sha256": "9e4b85ba5af169e6d59541c7fb39b3a023c7db4218143d596b172df1ca1844d3"
+    },
+    {
+      "path": "app/static/site.css",
+      "upstream_sha256": "2dde95ab0e8147257ec50e59a1112f952d8122e079aec302fa5fcac0a97d5b08"
+    },
+    {
+      "path": "app/static/site.js",
+      "upstream_sha256": "3431f76558e6d22993cecf4fa7e23e7c96d039bf3c10488ab294100a1543cfff"
+    },
+    {
+      "path": "deploy/bootstrap-host.sh",
+      "upstream_sha256": "67fc77a394f7628aa2767072e92a9e5fe8eff36b7754d2e1c86fdc1173242958"
+    },
+    {
+      "path": "deploy/bootstrap-vpn.py",
+      "upstream_sha256": "c199dd1df63b6f52d7a47359c04e1d7f590bd1187202e904b9c863c7f2cf7d2e"
+    },
+    {
+      "path": "deploy/bootstrap.example.json",
+      "upstream_sha256": "4ec4e8f523694203ab1cd6fdb7d7cb437e946701680bc1f870783a64e485a349"
+    },
+    {
+      "path": "deploy/install.sh",
+      "upstream_sha256": "aaea6f71a566c73c6f1e3cb14861e4bdcbf69bbba6a1267dbc2251093bbc63f8"
+    },
+    {
+      "path": "deploy/lib.sh",
+      "upstream_sha256": "f0cfd5a2e1e13c25ad5907fa181a8776ac9dd40d4adfb94bdb513ae609195b72"
+    },
+    {
+      "path": "deploy/https.sh",
+      "upstream_sha256": "39f543bda5bc63e77d4dcdb093c206e62943517b644e2c5516cae29859dd19ee"
+    },
+    {
+      "path": "deploy/update.sh",
+      "upstream_sha256": "1040d63a80e0a152f26500e23c11f91ed911e87077fb48a163d5b65b0c9aa8f3"
+    },
+    {
+      "path": "deploy/access-site",
+      "upstream_sha256": "326bb95ef676cc67a4c384d2a75d1ac84a13002b9c0cee57ece36949592d37d6"
+    },
+    {
+      "path": "deploy/vpn-lifecycle.py",
+      "upstream_sha256": "a9c8d447fd01a0de9b98ee13adeb711db73d90133e1655e4f929021fe206ce28"
+    },
+    {
+      "path": "deploy/delete-first.py",
+      "upstream_sha256": "925442e7e0575dd1ddc3fa39cbc9c4bf78c4f2cb9b02b2f2be214048a4604ed3"
+    },
+    {
+      "path": "deploy/vpn_recovery.py",
+      "upstream_sha256": "bd2044e66695fd00c3982f9ceb36b7058c63d4034a70b1b663685510f6cdc7c7"
+    },
+    {
+      "path": "deploy/lifecycle-result.py",
+      "upstream_sha256": "612a75fac361c2a69b7204f691507d578bfaa6d26ac9ce40eb8e62b47fb26352"
+    },
+    {
+      "path": "deploy/xui_setup.py",
+      "upstream_sha256": "db6f3a188cddeac68db5ea3021955345b943613aaea1efa12b486a7a66040057"
+    },
+    {
+      "path": "deploy/install-3x-ui-remote.py",
+      "upstream_sha256": "11642836571a403f468f27bdb5c734a7995899821b9b226fc71d7885fbb4ccfb"
+    },
+    {
+      "path": "deploy/vpn-probe.py",
+      "upstream_sha256": "8926e5f293c578951bf1bb8b2c8a7df03c9bdeb5ae0f5fa664bf6b9ee8780c64"
+    },
+    {
+      "path": "deploy/notification-proxy.py",
+      "upstream_sha256": "51f80db571fe01fd7217a4bb4e4498873ae23b2472006a0d75e772ac65341dbc"
+    },
+    {
+      "path": "deploy/tcp-relay.py",
+      "upstream_sha256": "51e01306cd65f7ab574b279783d1df0a9b780a40c3889c8fc33eebf6131b8d8a"
+    },
+    {
+      "path": "deploy/vpn-tls.py",
+      "upstream_sha256": "27db21adb2d9500ea1ea926ad5809b02eb6f6aa8684d81ab45b60b4c8dccf735"
+    },
+    {
+      "path": "deploy/export-state.py",
+      "upstream_sha256": "611805fbc61eb47ef41afcfd014fa294594856b76e3a467a8396ee6c64e6b258"
+    },
+    {
+      "path": "deploy/telegram.env.example",
+      "upstream_sha256": "c4dd73f3e7e245d9c991030d31739053de44c39d2a5bf8d29ff18fbacdc82af5"
+    },
+    {
+      "path": "deploy/ntfy.env.example",
+      "upstream_sha256": "5f380ca21e95a61cc4e11efa2984aa9cf5a54725294c40eb0870dcc4e8f916a6"
+    },
+    {
+      "path": "deploy/systemd/access-site-backup.service",
+      "upstream_sha256": "275b13a9e892771ae896f30ac69abd7d0750338083db78bb45877a511a3f2905"
+    },
+    {
+      "path": "deploy/systemd/access-site-backup.timer",
+      "upstream_sha256": "f0e4d587a2fb0ec31598484bdacb8c3b49c5005187d439a6b291766aaedbc1d6"
+    },
+    {
+      "path": "deploy/systemd/access-site-cert-renew@.service",
+      "upstream_sha256": "94cf1a2aee357d601bac494a282f374dd011269cf746955b4c4920635f40dbe8"
+    },
+    {
+      "path": "deploy/systemd/access-site-cert-renew@.timer",
+      "upstream_sha256": "92a47a1f7c70f8bf3e546e30a04a8867e3b1de04f2137ef62c5ce878e0d3af73"
+    },
+    {
+      "path": "deploy/systemd/access-site-delete-first.service",
+      "upstream_sha256": "78e7da27d7b2e98e4210e304b84abdb8568fdbca9802feb18587d5093d7b399f"
+    },
+    {
+      "path": "deploy/systemd/access-site-delete-first.timer",
+      "upstream_sha256": "2b9bda756f183c0a107e43383677945d05087dde11cf5c3f23bef48fb4104d8a"
+    },
+    {
+      "path": "deploy/systemd/access-site-events.service",
+      "upstream_sha256": "a8371f3eafd03a6ae190930d2070c5350438c7973376c91bb84172f8d0cbd226"
+    },
+    {
+      "path": "deploy/systemd/access-site-events.timer",
+      "upstream_sha256": "b2e60782958234d35bfb47dffe1081c6b74622db2f40857c6684d7a867f88787"
+    },
+    {
+      "path": "deploy/systemd/access-site-infrastructure.service",
+      "upstream_sha256": "a2fa03caa02d61bc7730844d70b243a0c9c0f4385391434c6209c17cca98b143"
+    },
+    {
+      "path": "deploy/systemd/access-site-infrastructure.timer",
+      "upstream_sha256": "fb23c9aa2653709a810bdff0e373cb98c48f832b148ffe5fa35537b76f284666"
+    },
+    {
+      "path": "deploy/systemd/access-site-notification-proxy.service",
+      "upstream_sha256": "2db08ad9c982383b91e8d62520f601196ba2e56a869a33bed2e65c36bde99c41"
+    },
+    {
+      "path": "deploy/systemd/access-site-ntfy.service",
+      "upstream_sha256": "dbc200141c26423b00dc0c7e8d5e74223eb001e1735507b2cc9bb71db07037b0"
+    },
+    {
+      "path": "deploy/systemd/access-site-ntfy.timer",
+      "upstream_sha256": "e59158d92b55909e9a579198b48e24bde7b1b497581ad97d73a4a90c7341144f"
+    },
+    {
+      "path": "deploy/systemd/access-site-reminders.service",
+      "upstream_sha256": "05a7e9c8ac0c3b1e25c03cb7fcb3e87e419ce5407964bf6ea439a9f508c12fbc"
+    },
+    {
+      "path": "deploy/systemd/access-site-reminders.timer",
+      "upstream_sha256": "adf5029d5c17e16aee5dae5ba82f4a378af3e62941728fb992bee8913df051e7"
+    },
+    {
+      "path": "deploy/systemd/access-site-tcp-relay.service",
+      "upstream_sha256": "6816b26be75eff0a758262fa16c5e61773c8543ee5195637e554633e6fc36757"
+    },
+    {
+      "path": "deploy/systemd/access-site-vpn-lifecycle.service",
+      "upstream_sha256": "9886fcb616d08a442ba5a3589194095fc7c27592daa3c6502dde4b7873358484"
+    },
+    {
+      "path": "deploy/systemd/access-site-vpn-lifecycle.timer",
+      "upstream_sha256": "d7f349b407c175f967d8b511b8d20b15584d18f789311d5d84830d0f2ebb9f3e"
+    },
+    {
+      "path": "deploy/systemd/access-site.service",
+      "upstream_sha256": "cf0af0a1588e1d2c8b61b9c4f67408354203e403c74e3187d9ad06f12d13145a"
+    },
+    {
+      "path": "tests/test_access_site.py",
+      "upstream_sha256": "ac55b165b252e5b91bd342649e98c708a86af1f03dbc1e35c11638580377a591"
+    },
+    {
+      "path": "tests/test_bootstrap.py",
+      "upstream_sha256": "c6d67d2d18295329cde1b9c5d7febed82ff41e7ddc839becedeae8a988921b88"
+    },
+    {
+      "path": "tests/test_delete_first.py",
+      "upstream_sha256": "27bb9b21ddd8023459b5057fb9ed659093bba0c89f621c3aab572848ce50bf72"
+    },
+    {
+      "path": "tests/test_export_state.py",
+      "upstream_sha256": "5f52b2420f5b1f8420c4a7245d5cfba609f25c2c062b6ce1ace2db9b31b6bd7b"
+    },
+    {
+      "path": "tests/test_infrastructure.py",
+      "upstream_sha256": "c3b0128daeb1c885a8d934eed2bd3c48e15515b45df8133e3a5611a7bc6ca7ef"
+    },
+    {
+      "path": "tests/test_node_migration.py",
+      "upstream_sha256": "7fe061cf915bf60624556f47fa1030537cdc010544bc84289ec1bfcbb4c341cf"
+    },
+    {
+      "path": "tests/test_notification_proxy.py",
+      "upstream_sha256": "38f7da8eab23a730e3334b869e42f569ff2e6f94f3c4d052b4b8965e251726f1"
+    },
+    {
+      "path": "tests/test_ntfy.py",
+      "upstream_sha256": "4c6daf8b5e37f0de07938dc6b4100be4826f53ccfc140d48e2345c59fee1601d"
+    },
+    {
+      "path": "tests/test_problem_reports.py",
+      "upstream_sha256": "0470243fd50bc39548dd2d79f15099de27b36016b0ec8c2f9a56cfa3a59756e4"
+    },
+    {
+      "path": "tests/test_reminders.py",
+      "upstream_sha256": "18a044d1cb5a1bad2a897a6182d9b59fcf07f56cb8e83c2b97cef55fe295c934"
+    },
+    {
+      "path": "tests/test_tcp_relay.py",
+      "upstream_sha256": "448a75547abdcc2cb7599f034d48ebfc1a17b82233e564d36b24a215a8daf269"
+    },
+    {
+      "path": "requirements.txt",
+      "upstream_sha256": "fd70ff6d494cf25056315e1229b2e29d9dafb6a45fdad449131d294fcbb9f90f"
+    },
+    {
+      "path": "requirements-dev.txt",
+      "upstream_sha256": "d7782d151a26685f096123e87d1979316a32e9ff7b8d4614d7469722bd4df61d"
+    },
+    {
+      "path": "requirements-constraints.txt",
+      "upstream_sha256": "b2a57b9758333f927a3cbfb0cb5ed8bc7151c92d098092b260a837a85be88eaf"
+    },
+    {
+      "path": "launcher/dist/cabinet.js",
+      "upstream_sha256": "0b9e00c04cc5926e216e6fb1faba6ccc2d28f922d7c604640ad84d1157f1635c"
+    },
+    {
+      "path": "launcher/dist/site.css",
+      "upstream_sha256": "70734d382aafa13ec0d8938fc47c76f7ce63d09265aa876dac92d3d1a44575fe"
+    }
+  ],
+  "excluded_after_review": [
+    {
+      "path": "deploy/refresh-costs.py",
+      "upstream_sha256": "7b936a5cde35dc00d4889c16cde9891ded896b662857b9f192fcd298bfecb0ee"
+    }
+  ]
+}

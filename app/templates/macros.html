@@ -1,0 +1,18 @@
+{% macro csrf_field(csrf) %}
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+{% endmacro %}
+
+{% macro logout(csrf) %}
+  <form method="post" action="/logout">
+    {{ csrf_field(csrf) }}
+    <button class="nav-button" type="submit">Выйти</button>
+  </form>
+{% endmacro %}
+
+{% macro timestamp(value) %}
+  {% if value %}<time datetime="{{ value|iso_time }}">{{ (value|iso_time)[:16]|replace('T', ' ') }} UTC</time>{% else %}—{% endif %}
+{% endmacro %}
+
+{% macro access_deadline(value) %}
+  {% if value %}{{ (value|access_date).strftime('%d.%m.%Y') }} в 12:00 МСК{% else %}Бессрочно{% endif %}
+{% endmacro %}

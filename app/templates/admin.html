@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% from "macros.html" import access_deadline, csrf_field, logout, timestamp %}
+{% block title %}Администрирование · Кабинет доступа{% endblock %}
+{% block nav %}{{ logout(csrf) }}{% endblock %}
+{% block body %}
+<main class="shell">
+  <div class="heading">
+    <h1>Администрирование</h1>
+    <span class="badge">{{ 'Основной сервер' if primary else 'Резервный сервер' }}</span>
+  </div>
+  {% if infrastructure_enabled %}
+  <p><a class="button outline" href="/admin/infrastructure">Серверы и заявки на замену</a></p>
+  {% endif %}
+  <div class="admin-grid">
+    <section class="card" aria-labelledby="sync-heading">
+      <h2 id="sync-heading">{{ 'Синхронизация' if replication_enabled else 'Основная база' }}</h2>
+      <dl class="stats">
+        <dt>Локальная ревизия</dt><dd>{{ revision }}</dd>
+        {% if replication_enabled %}
+        <dt>{{ 'Переданная ревизия' if primary else 'Принятая ревизия' }}</dt><dd>{{ sync.revision if sync and sync.revision is not none else '—' }}</dd>
+        <dt>Последний успех</dt><dd>{{ timestamp(sync.last_success if sync else none) }}</dd>
+        <dt>Последняя попытка</dt><dd>{{ timestamp(sync.last_attempt if sync else none) }}</dd>
+        {% endif %}
+      </dl>
+      {% if not replication_enabled %}<p>База пользователей находится на этом сервере.</p>{% endif %}
+      {% if replication_enabled %}
+      {% if sync and sync.error %}<p class="notice warning">Последняя попытка завершилась ошибкой ({{ sync.error }}).</p>{% endif %}
+      {% if pending %}<p class="notice warning">{{ 'Локальные изменения ещё не подтверждены резервным сервером.' if primary else 'Локальная ревизия ещё не подтверждена журналом синхронизации.' }}</p>{% endif %}
+      {% if stale %}<p class="notice warning">Данные о синхронизации устарели или ещё отсутствуют.</p>{% endif %}
+      {% endif %}
+    </section>
+    {% if can_manage %}
+    <section class="card" aria-labelledby="add-heading">
+      <h2 id="add-heading">Добавить пользователя</h2>
+      <form class="stack" method="post" action="/admin/users">
+        {{ csrf_field(csrf) }}
+        <label>Имя учётной записи
+          <input name="login" minlength="3" maxlength="32" pattern="[A-Za-z0-9][A-Za-z0-9_.\-]{2,31}"
+                 autocomplete="off" autocapitalize="none" spellcheck="false" required>
+        </label>
+        <label>Система устройства
+          <select name="platform">
+            {% for value, label in platforms.items() %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select>
+        </label>
+        <button class="button" type="submit">Создать и получить пароль</button>
+      </form>
+    </section>
+    {% else %}
+    <section class="card">
+      <h2>Режим резерва</h2>
+      <p class="muted">Чтобы менять учётные записи, восстановите соединение с основным сервером или переведите резервный в основную роль.</p>
+    </section>
+    {% endif %}
+  </div>
+  <section class="card" aria-labelledby="users-heading">
+    <h2 id="users-heading">Пользователи</h2>
+    {% for user in users %}
+    <details class="account" id="user-{{ user.id }}"{% if request.query_params.get('user') == user.id %} open{% endif %}>
+      <summary>
+        <span class="account-name">{{ user.login }}</span>
+        <span class="badge{% if not user.enabled or user.expired %} badge-disabled{% endif %}">
+          {% if not user.enabled %}Доступ отозван{% elif user.expired %}Срок доступа истёк{% else %}Доступ открыт{% endif %}
+        </span>
+      </summary>
+      <div class="account-body">
+        <p class="muted">Система устройства — {{ platforms[user.get('platform', 'any')] }}</p>
+        <p class="muted">Последнее обновление ссылки {{ timestamp(user.config_at) }}</p>
+        <p>Окончание доступа <strong>{{ access_deadline(user.access_until) }}</strong></p>
+        {% if can_manage %}
+        <form class="stack" method="post" action="/admin/users/{{ user.id }}/access">
+          {{ csrf_field(csrf) }}
+          <label>Дата окончания доступа
+            <input type="date" name="access_date" min="1970-01-01" max="9999-12-31"
+                   value="{{ (user.access_until|access_date).isoformat() if user.access_until else '' }}" required>
+          </label>
+          <div class="term-actions">
+            <button class="button outline" type="submit">Сохранить дату</button>
+            <button class="button" type="submit" formnovalidate
+                    formaction="/admin/users/{{ user.id }}/extend">Продлить на месяц</button>
+          </div>
+        </form>
+        {% if not user.managed %}
+        <form class="stack" method="post" action="/admin/users/{{ user.id }}/config">
+          {{ csrf_field(csrf) }}
+          <label>Новая конфигурационная ссылка
+            <textarea name="config" rows="2" maxlength="8192" autocapitalize="none" spellcheck="false" required></textarea>
+          </label>
+          <button class="button compact" type="submit">Сохранить ссылку</button>
+        </form>
+        {% endif %}
+        <div class="actions">
+          {% if primary %}
+          <form method="post" action="/admin/users/{{ user.id }}/show-password">
+            {{ csrf_field(csrf) }}
+            <button class="button outline" type="submit">Получить текущий пароль</button>
+          </form>
+          {% endif %}
+          <form method="post" action="/admin/users/{{ user.id }}/password" data-confirm="Сгенерировать новый пароль и завершить текущие сеансы пользователя?">
+            {{ csrf_field(csrf) }}
+            <button class="button outline" type="submit">Новый пароль</button>
+          </form>
+          <form method="post" action="/admin/users/{{ user.id }}/{{ 'revoke' if user.enabled else 'enable' }}">
+            {{ csrf_field(csrf) }}
+            <button class="button outline" type="submit">{{ 'Отозвать доступ' if user.enabled else 'Восстановить доступ' }}</button>
+          </form>
+          <form method="post" action="/admin/users/{{ user.id }}/delete" data-confirm="Удалить учётную запись и её конфигурацию?">
+            {{ csrf_field(csrf) }}
+            <button class="button danger" type="submit">Удалить</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </details>
+    {% else %}<p class="muted">Пользователей пока нет.</p>{% endfor %}
+  </section>
+  <section class="card" aria-labelledby="audit-heading">
+    <h2 id="audit-heading">Журнал изменений</h2>
+    <ol class="audit">
+      {% for event in audit %}
+        <li><span>{{ actions[event.action] }} <strong>{{ event.login }}</strong></span>{{ timestamp(event.happened_at) }}</li>
+      {% else %}<li class="muted">Изменений пока нет.</li>{% endfor %}
+    </ol>
+  </section>
+</main>
+{% endblock %}

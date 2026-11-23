@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field %}
+{% block title %}{% if admin %}Вход администратора{% else %}Вход в кабинет{% endif %} · Кабинет доступа{% endblock %}
+{% block body %}
+<main class="shell shell-narrow">
+  <section class="card">
+    <h1>{% if admin %}Вход администратора{% else %}Вход в кабинет{% endif %}</h1>
+    {% if error %}<p class="notice warning" role="alert">{{ error }}</p>{% endif %}
+    <form class="stack" method="post" action="{{ '/admin/login' if admin else '/login' }}">
+      {{ csrf_field(csrf) }}
+      <label>Пароль
+        <input type="password" name="password" autocomplete="current-password" autocapitalize="none"
+               spellcheck="false" {% if admin %}maxlength="256"{% else %}aria-describedby="password-hint"{% endif %} required>
+      </label>
+      {% if not admin %}<p id="password-hint" class="muted">Введите пароль из 6 символов, который выдал администратор.</p>{% endif %}
+      <button class="button" type="submit">Войти</button>
+    </form>
+  </section>
+  {% if admin %}<a class="secondary-link" href="/">Пользовательский вход</a>{% else %}
+    <a class="secondary-link" href="/admin/login">Вход для администратора</a>
+  {% endif %}
+</main>
+{% endblock %}

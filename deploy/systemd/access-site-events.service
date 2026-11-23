@@ -1,0 +1,20 @@
+[Unit]
+Description=Deliver user problem reports and queued activity notifications
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=access-site
+Group=access-site
+EnvironmentFile=/etc/access-site/site.env
+EnvironmentFile=-/etc/access-site/telegram.env
+WorkingDirectory=/opt/access-site/current
+ExecStart=/opt/access-site/current/venv/bin/python -m app.events
+TimeoutStartSec=8min
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/access-site/data

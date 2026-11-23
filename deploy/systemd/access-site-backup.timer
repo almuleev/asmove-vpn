@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily SQLite backup of the access cabinet
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+Unit=access-site-backup.service
+
+[Install]
+WantedBy=timers.target

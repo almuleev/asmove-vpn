@@ -1,0 +1,24 @@
+[Unit]
+Description=Check VPN nodes and process administrator-approved replacements
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/var/lib/access-site/infrastructure.json
+
+[Service]
+Type=oneshot
+User=access-site
+Group=access-site
+WorkingDirectory=/opt/access-site/current
+EnvironmentFile=/etc/access-site/site.env
+EnvironmentFile=-/etc/access-site/infrastructure.env
+EnvironmentFile=-/etc/access-site/telegram.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/access-site/current/venv/bin/python -m app.cli infrastructure-tick
+UMask=0077
+TimeoutStartSec=8min
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/access-site/data

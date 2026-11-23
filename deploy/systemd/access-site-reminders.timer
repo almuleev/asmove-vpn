@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the subscription reminder task at 11:30 Moscow time
+ConditionPathExists=/etc/access-site/telegram.env
+
+[Timer]
+OnCalendar=*-*-* 11:30:00 Europe/Moscow
+AccuracySec=1s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

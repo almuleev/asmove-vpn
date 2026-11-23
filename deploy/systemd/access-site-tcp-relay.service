@@ -1,0 +1,25 @@
+[Unit]
+Description=Restricted encrypted TCP relay to the current EU VPN
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/var/lib/access-site/data/tcp-relay.json
+
+[Service]
+Type=simple
+User=access-site
+Group=access-site
+ExecStart=/usr/bin/python3 /opt/nodeguard-control/deploy/tcp-relay.py --config /var/lib/access-site/data/tcp-relay.json --infrastructure /var/lib/access-site/infrastructure.json
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=5
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+InaccessiblePaths=/var/lib/access-site/control
+CapabilityBoundingSet=
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

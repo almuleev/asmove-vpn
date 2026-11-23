@@ -1,0 +1,12 @@
+{
+  "eu_ip": "REPLACE_WITH_PUBLIC_EU_IPV4",
+  "eu_service_id": 0,
+  "eu_host_fingerprint": "SHA256:REPLACE_WITH_FINGERPRINT_FROM_PROVIDER_CONSOLE",
+  "country": "nl",
+  "datacenter_id": 0,
+  "vdsina_token_file": null,
+  "candidates": [],
+  "telegram_env_file": null,
+  "ntfy_env_file": null,
+  "recovery_archive_file": null
+}

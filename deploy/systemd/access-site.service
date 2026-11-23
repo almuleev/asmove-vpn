@@ -1,0 +1,30 @@
+[Unit]
+Description=Access cabinet (FastAPI)
+After=network.target
+
+[Service]
+Type=simple
+User=access-site
+Group=access-site
+EnvironmentFile=/etc/access-site/site.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+WorkingDirectory=/opt/access-site/current
+ExecStart=/opt/access-site/current/venv/bin/python -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8016 --workers 1 --proxy-headers --forwarded-allow-ips 127.0.0.1 --no-access-log --limit-concurrency 32
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=20
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/access-site/data
+InaccessiblePaths=/var/lib/access-site/sender
+InaccessiblePaths=-/var/lib/access-site/control
+IPAddressDeny=any
+IPAddressAllow=localhost
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,20 @@
+# VPN Node Guard: правила работы
+
+Прочитайте README.md, docs/INSTALL.md, docs/OPERATIONS.md, docs/AUDIT.md.
+Работайте только в этом самостоятельном проекте. Исходное размещение не является
+тестовой средой. Не подключайтесь к production и не используйте его секреты.
+
+Не меняйте SITE_ACCESS_KEY на существующей базе. Сохраняйте UUID, access_index,
+auth_version, хэши, сроки и подписи подписок. Проверяйте все inbound ID клиента.
+Не отключайте TLS. Перед публикацией ссылки нужен реальный HTTPS через Xray.
+Замена требует IP + подтверждения простоя, свежего архива и журнала намерения.
+Не повторяйте POST после неизвестного ответа; сверяйте текущий job и инвентарь.
+Только фиксированный тариф USD 0.07/day через VDSina.com. Нельзя арендовать или
+удалять VPS для проверки тестов. Relay только с явным whitelist.
+
+Проверки: python -m unittest discover -s tests; node --test launcher/test.mjs;
+python tools/build_site.py; python tools/check_public.py; bash -n для deploy/*.sh
+и deploy/access-site. Чистый venv, unit-тесты, реальный VPS и пользовательская сеть
+должны быть отдельными пунктами отчёта. Не публикуйте .local, .venv, .build и секреты.
+Рекламный Pages использует только .build/pages; launcher/dist — шаблон отдельного
+кабинета. Не публикуйте backend как статический сайт. Перед изменениями git status.

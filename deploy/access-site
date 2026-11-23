@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+[[ $EUID -eq 0 ]]
+set -a
+source /etc/access-site/site.env
+if [[ -f /etc/access-site/sync.env ]]; then
+    source /etc/access-site/sync.env
+fi
+set +a
+export PYTHONDONTWRITEBYTECODE=1
+cd /opt/access-site/current
+exec /usr/bin/timeout 90 /usr/bin/setpriv \
+    --reuid=access-site --regid=access-site --clear-groups --no-new-privs \
+    ./venv/bin/python -m app.cli "$@"

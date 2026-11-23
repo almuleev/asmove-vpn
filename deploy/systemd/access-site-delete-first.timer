@@ -1,0 +1,10 @@
+[Unit]
+Description=Check VPN backups and advance approved replacements
+
+[Timer]
+OnBootSec=1min
+OnUnitInactiveSec=30s
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

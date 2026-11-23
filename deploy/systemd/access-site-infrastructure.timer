@@ -1,0 +1,10 @@
+[Unit]
+Description=Check VPN nodes once per minute
+
+[Timer]
+OnBootSec=1min
+OnUnitInactiveSec=1min
+Unit=access-site-infrastructure.service
+
+[Install]
+WantedBy=timers.target

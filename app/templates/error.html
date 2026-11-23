@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Ошибка · Кабинет доступа{% endblock %}
+{% block body %}
+<main class="shell shell-narrow">
+  <section class="card">
+    <h1>Не удалось выполнить запрос</h1>
+    <p>{{ message }}</p>
+    <a href="/">Вернуться в кабинет</a>
+  </section>
+</main>
+{% endblock %}

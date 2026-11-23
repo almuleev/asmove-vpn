@@ -1,0 +1,29 @@
+[Unit]
+Description=Send subscription reminders to the administrator's Telegram chat
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=/etc/access-site/telegram.env
+StartLimitIntervalSec=1h
+StartLimitBurst=3
+
+[Service]
+Type=oneshot
+User=access-site
+Group=access-site
+EnvironmentFile=/etc/access-site/site.env
+EnvironmentFile=/etc/access-site/telegram.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+WorkingDirectory=/opt/access-site/current
+ExecStart=/opt/access-site/current/venv/bin/python -m app.reminders
+StateDirectory=access-site-reminders
+StateDirectoryMode=0700
+TimeoutStartSec=15min
+Restart=on-failure
+RestartSec=5min
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+CapabilityBoundingSet=

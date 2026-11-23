@@ -1,0 +1,8 @@
+[Unit]
+Description=Renew the access cabinet certificate for %i
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/access-site-certbot/bin/certbot renew --quiet --cert-name access-site-%i

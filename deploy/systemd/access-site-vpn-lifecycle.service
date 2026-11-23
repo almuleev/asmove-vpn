@@ -1,0 +1,20 @@
+[Unit]
+Description=Prepare VPN nodes and publish administrator-approved replacements
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/var/lib/access-site/infrastructure.json
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/access-site/current
+EnvironmentFile=/etc/access-site/site.env
+EnvironmentFile=-/etc/access-site/infrastructure.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/access-site/current/venv/bin/python /opt/nodeguard-control/deploy/vpn-lifecycle.py
+ExecStopPost=/opt/access-site/current/venv/bin/python /opt/nodeguard-control/deploy/vpn-lifecycle.py --recover
+UMask=0077
+TimeoutStartSec=18min
+PrivateTmp=yes
+ProtectHome=yes
+NoNewPrivileges=yes

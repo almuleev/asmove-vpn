@@ -1,0 +1,11 @@
+[Unit]
+Description=Retry queued ntfy notifications
+ConditionPathExists=/etc/access-site/ntfy.env
+
+[Timer]
+OnBootSec=20s
+OnUnitInactiveSec=15s
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target

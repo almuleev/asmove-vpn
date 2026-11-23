@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% from "macros.html" import csrf_field, logout, timestamp %}
+{% block title %}Серверы · VPN Node Guard{% endblock %}
+{% block nav %}{{ logout(csrf) }}{% endblock %}
+{% block body %}
+<main class="shell">
+  <h1>Серверы и замены</h1>
+  <p><a href="/admin">Вернуться в админку</a></p>
+  <p>Проверки и замена запускаются с российского сервера. Доступность Telegram на управление не влияет.</p>
+  <p><a class="button outline" href="/admin/infrastructure">Обновить состояние</a></p>
+  <section class="card">
+    <h2>Уведомления</h2>
+    <p>Telegram. Сообщений в очереди: <strong>{{ queued_notifications }}</strong>.</p>
+    {% if ntfy_state %}
+    <p>ntfy. Сообщений в очереди: <strong>{{ ntfy_state.queued }}</strong>.
+      Последняя доставка {{ timestamp(ntfy_state.last_success) }}.</p>
+    {% if ntfy_url %}<p><a href="{{ ntfy_url }}" target="_blank" rel="noopener noreferrer">Открыть канал ntfy</a>. Ссылка предназначена только для администратора.</p>{% endif %}
+    <p>ntfy работает напрямую с российского сервера. Каналы доставляют сообщения независимо друг от друга.</p>
+    {% endif %}
+    <p>Если канал доставки недоступен, сообщения сохраняются до восстановления связи. Состояние VPN и ход замены доступны на этой странице.</p>
+  </section>
+  <section class="card">
+    <h2>Параметры замены</h2>
+    <p>Режим — {{ 'имитация' if config.mode == 'simulate' else 'заказ через API' }}.</p>
+    <p>Каждую замену запускает администратор.</p>
+    <p>Максимум {{ config.max_servers }} целевых VPS{% if config.allow_overlap %}, при замене разрешён один дополнительный{% endif %}.</p>
+    <p>Для подтверждения проблемы нужны {{ config.required_ru_probes }} {{ 'проверка VPN из российской сети' if config.required_ru_probes == 1 else 'проверки VPN из разных российских сетей' }}
+      и {{ config.failures }} неудачных циклов подряд.</p>
+    {% if config.required_ru_probes == 1 %}<p>Одна точка проверки обнаруживает недоступность VPN из этой сети; причину сбоя нужно уточнять.</p>{% endif %}
+  </section>
+  {% if config.delete_first.enabled %}
+  <section class="card">
+    <h2>Замена VPS с простоем</h2>
+    <p>После вашего подтверждения старый зарубежный VPS удаляется, затем заказывается и настраивается новый. VPN будет недоступен до завершения восстановления.</p>
+    <p>Возможность создания нового VPS проверяется при замене. Если провайдер отклонит запрос, восстановление будет ожидать решения администратора.</p>
+    {% for node in config.nodes %}
+      {% set check = replacement_checks.get(node.id) %}
+      <h3>{{ node.id }} · {{ node.ip }}</h3>
+      {% if check and check.finished %}
+        <p>Последняя проверка готовности {{ timestamp(check.finished) }}.</p>
+        {% if check.result.get('ready') %}
+          <p class="notice">Архив проверен. Клиентов x-ui: {{ check.result.panel_clients }}. Копия создана {{ timestamp(check.result.backup_at) }}. API доступен без VPN.</p>
+        {% else %}<p class="notice warning">Проверка не пройдена: {{ operation_error(check.result.get('error')) }} Удаление не выполнялось.</p>{% endif %}
+      {% elif check %}<p role="status">Проверка готовности ожидает запуска.</p>{% endif %}
+      <form method="post" action="/admin/infrastructure/{{ node.id }}/check-delete-first">
+        {{ csrf_field(csrf) }}<button class="button outline" type="submit">Проверить готовность без удаления</button>
+      </form>
+      <form method="post" action="/admin/infrastructure/{{ node.id }}/delete-first">
+        {{ csrf_field(csrf) }}<button class="button outline" type="submit">Заменить сервер</button>
+      </form>
+    {% endfor %}
+  </section>
+  {% endif %}
+  <section class="card">
+    <h2>Проверки</h2>
+    {% for node in nodes %}
+    <p><strong>{{ node.id }}{% if node.ip %} · {{ node.ip }}:{{ node.port }}{% endif %}</strong> — {{ {'healthy':'VPN доступен','failed':'Подтверждён сбой VPN','suspect':'Повторяем проверку','unknown':'Недостаточно свежих данных'}.get(node.state, node.state) }}.
+      Последняя проверка {{ timestamp(node.observed_at) }}.</p>
+    {% else %}<p>Ожидаем первый запуск мониторинга.</p>{% endfor %}
+    {% if not config.delete_first.enabled %}
+    {% for node in config.nodes %}
+    <form method="post" action="/admin/infrastructure/{{ node.id }}/request">
+      {{ csrf_field(csrf) }}
+      <button class="button outline" type="submit">Подготовить замену {{ node.id }}</button>
+    </form>
+    {% endfor %}
+    {% for node in config.get('additions', []) %}
+    <form method="post" action="/admin/infrastructure/{{ node.id }}/add">
+      {{ csrf_field(csrf) }}
+      <button class="button outline" type="submit">Подготовить добавление второго VPN-узла</button>
+    </form>
+    {% endfor %}
+    {% endif %}
+  </section>
+  <section class="card">
+    <h2>Заявки</h2>
+    {% for job in jobs %}
+    <article class="account-body">
+      <h3>{{ job.node }} — {{ labels[job.status] }}</h3>
+      {% if job.spec.addition %}<p>Добавление второго узла. Действующий VPN продолжит работать.</p>{% endif %}
+      {% if job.spec.delete_first %}<p class="notice warning">Замена с простоем: старый VPS №{{ job.spec.old.service_id }}, IP {{ job.spec.old.ip }}, будет удалён до заказа нового. Коды доступа и адреса подписок сохраняются. Прямые ссылки потребуется импортировать заново.</p>{% endif %}
+      <p>Заявка {{ job.id }}. Создана {{ timestamp(job.created) }}.</p>
+      {% if job.spec.manual %}<p>Причина — запрос администратора.</p>{% endif %}
+      <p>Замена — {{ job.spec.candidate.country|upper }}, площадка №{{ job.spec.candidate.datacenter_id }}.</p>
+      {% if job.spec.addition and job.spec.candidate.country == 'nl' %}
+      <p class="notice warning">Это ещё один узел в Нидерландах. Другая площадка даёт резерв, но независимость страны и ASN не обеспечена. Подтверждение разрешает такое размещение.</p>
+      {% endif %}
+      {% if job.spec.overlap %}<p>Во время замены оба сервера могут работать одновременно.</p>{% endif %}
+      {% if job.status == 'pending' %}
+      <p>Подтверждение доступно до {{ timestamp(job.expires) }}.</p>
+      <p>Состояние удаления, заказа и восстановления отображается в этой заявке.</p>
+      <form method="post" action="/admin/infrastructure/{{ job.id }}/approve"{% if job.spec.delete_first %} data-confirm="Удалить VPS {{ job.spec.old.ip }} и заказать новый? VPN будет недоступен до завершения восстановления."{% endif %}>
+        {{ csrf_field(csrf) }}
+        {% if job.spec.delete_first %}
+          <label>IP удаляемого VPS<input name="delete_ip" placeholder="{{ job.spec.old.ip }}" autocomplete="off" required></label>
+          <label class="checkbox"><input type="checkbox" name="accept_downtime" value="yes" required>Подтверждаю удаление этого VPS и простой VPN</label>
+        {% endif %}
+        <button class="button{% if job.spec.delete_first %} danger{% endif %}" type="submit">{{ 'Подтвердить имитацию' if job.spec.mode == 'simulate' else ('Подтвердить удаление и заказ' if job.spec.delete_first else 'Подтвердить заказ') }}</button>
+      </form>
+      {% endif %}
+      {% if job.status in ('pending','approved','preparing') or (job.status == 'attention' and job.spec.pre_deletion_failure) %}
+      <form method="post" action="/admin/infrastructure/{{ job.id }}/cancel">
+        {{ csrf_field(csrf) }}<button class="button outline" type="submit">Отменить</button>
+      </form>
+      {% endif %}
+      {% if job.error %}<p class="notice warning">{{ operation_error(job.error) }}</p>{% endif %}
+      {% if job.status == 'attention' %}
+      <form method="post" action="/admin/infrastructure/{{ job.id }}/resume">
+        {{ csrf_field(csrf) }}<button class="button outline" type="submit">Повторить проверку текущего заказа</button>
+      </form>
+      {% endif %}
+      {% if job.status in ('ready','attention') and job.service_id and not job.spec.addition and not job.spec.delete_first %}
+      <p>Новый VPS №{{ job.service_id }}. Старый VPS №{{ job.spec.old.service_id }} требует проверки перед удалением.</p>
+      {% endif %}
+      {% if job.spec.delete_first and job.service_id %}<p>Новый VPS №{{ job.service_id }}{% if job.ip %}, {{ job.ip }}{% endif %}. Повторный заказ при продолжении настройки не создаётся.</p>{% endif %}
+    </article>
+    {% else %}<p>Заявок пока нет.</p>{% endfor %}
+  </section>
+  <section class="card">
+    <h2>Журнал решений</h2>
+    {% for event in audit %}<p>{{ timestamp(event.happened_at) }} — {{ labels[event.action] }}, {{ event.job }}.</p>{% endfor %}
+  </section>
+</main>
+{% endblock %}

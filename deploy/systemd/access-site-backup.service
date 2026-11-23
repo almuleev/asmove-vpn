@@ -1,0 +1,20 @@
+[Unit]
+Description=Create a SQLite backup of the access cabinet
+
+[Service]
+Type=oneshot
+User=access-site
+Group=access-site
+EnvironmentFile=/etc/access-site/site.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+WorkingDirectory=/opt/access-site/current
+ExecStart=/opt/access-site/current/venv/bin/python -m app.cli backup
+TimeoutStartSec=90
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/access-site/data
+CapabilityBoundingSet=

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Кабинет доступа{% endblock %}</title>
+  <link rel="stylesheet" href="/static/site.css?v=guides-4">
+  <script src="/static/site.js?v=direct-connection-1" defer></script>
+</head>
+<body>
+  <header class="bar">
+    <div class="bar-inner">
+      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span> Кабинет доступа</a>
+      {% block nav %}{% endblock %}
+    </div>
+  </header>
+  {% block body %}{% endblock %}
+</body>
+</html>

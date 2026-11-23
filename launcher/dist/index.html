@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="cabinet-origin" content="https://controller.example">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src https://controller.example; base-uri 'none'; form-action 'none'">
+<title>Мой VPN · VPN Node Guard</title><link rel="stylesheet" href="site.css"><script type="module" src="cabinet.js"></script></head>
+<body><header class="bar"><div class="bar-inner"><a class="brand" href="./">Мой VPN</a><button id="logout" hidden>Выйти</button></div></header>
+<main class="shell shell-narrow"><section class="card"><h1>Кабинет доступа</h1>
+<form id="login-form"><label for="access-code">Код от администратора</label><input id="access-code" name="password" type="password" maxlength="6" autocomplete="current-password" required><button type="submit">Войти</button></form>
+<p id="feedback" role="status" hidden></p><div id="account" hidden><p>Окончание доступа: <strong id="deadline"></strong></p>
+<p id="updated" hidden></p><p id="config-missing" hidden>Администратор ещё не назначил подключение.</p>
+<p id="connection-intro">Добавьте подписку один раз. После замены сервера обновите её и переподключитесь.</p>
+<div id="primary-config"><div id="subscription-block"><h2>Подписка</h2><details><summary>Показать URL подписки</summary><textarea id="subscription" readonly aria-label="URL подписки"></textarea></details><button data-copy="subscription">Копировать подписку</button><p class="action-feedback" role="status"></p></div>
+<details id="ordinary-connection"><summary>Прямое подключение</summary><p>После замены узла импортируйте новую ссылку.</p><textarea id="config" readonly aria-label="Прямая ссылка"></textarea><button data-copy="config">Копировать ссылку</button><p class="action-feedback" role="status"></p></details></div>
+<div id="connection-guide" hidden><h2>Как подключиться</h2><ol><li>Откройте VPN-приложение с поддержкой VLESS XHTTP/TLS.</li><li>Добавьте подписку по URL, вставив скопированную ссылку.</li><li>Обновите подписку, выберите Connection и включите VPN.</li><li>Откройте сайт через VPN. Если подписка не поддерживается, импортируйте прямую ссылку из буфера обмена.</li></ol><p>Не включайте allowInsecure. Подробные инструкции доступны в кабинете на сервере владельца.</p></div></div></section>
+<section id="problem-report" class="card" hidden><h2>Не открываются сайты?</h2><button id="report-problem">Сообщить о проблеме</button><p id="problem-notice" role="status"></p><p id="problem-cooldown" hidden></p></section></main></body></html>

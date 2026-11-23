@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from "macros.html" import access_deadline, csrf_field, logout, timestamp %}
+{% from "connection_guides.html" import subscription_guide, ordinary_guide %}
+{% macro connection_link(target, copy_label, show_label, field_label, config) %}
+  <div class="stack">
+    <button type="button" class="button" data-copy="{{ target }}">{{ copy_label }}</button>
+    <p class="action-feedback" role="status"></p>
+    <details class="manual-link">
+      <summary>{{ show_label }}</summary>
+      <textarea id="{{ target }}" class="code" aria-label="{{ field_label }}" rows="4" spellcheck="false" readonly>{{ config }}</textarea>
+    </details>
+  </div>
+{% endmacro %}
+{% block title %}Моя конфигурация · Кабинет доступа{% endblock %}
+{% block nav %}{{ logout(csrf) }}{% endblock %}
+{% block body %}
+<main class="shell shell-narrow">
+  <section class="card">
+    <h1>Моя конфигурация</h1>
+    <p>Окончание доступа <strong>{{ access_deadline(account.access_until) }}</strong></p>
+    {% if account.config %}
+      {% if subscription %}
+      <div class="connection-intro">
+        <h2>Выберите способ подключения</h2>
+        <p>Рекомендуем подписку: добавьте её один раз и обновляйте настройки в приложении при замене сервера. Для добавления одного подключения используйте раздел «Прямое подключение» ниже.</p>
+      </div>
+      <div class="primary-method">
+        <p class="method-label">Основной способ</p>
+        <h2>Подписка</h2>
+        <p>Постоянная ссылка для загрузки настроек VPN.</p>
+        {{ connection_link('subscription', 'Копировать ссылку подписки', 'Показать ссылку подписки', 'Ссылка подписки', subscription) }}
+        <div class="connection-guide">
+          <h3>Инструкция для подключения подписки</h3>
+          <p>Выберите своё устройство и следуйте инструкции.</p>
+          {{ subscription_guide(account.platform) }}
+        </div>
+      </div>
+      {% endif %}
+      <details id="ordinary-connection" class="alternative-method"{% if not subscription %} open{% endif %}>
+        <summary>Прямое подключение</summary>
+        <div class="method-content">
+          <p class="method-label">Дополнительный вариант</p>
+          <p>Ссылка на одно подключение. Используйте её, если вам удобнее добавлять подключение вручную или приложение не поддерживает подписки.</p>
+          <p>При замене сервера нужно заново скопировать прямую ссылку из кабинета и импортировать её в приложение.</p>
+          <p class="muted">Обновлено {{ timestamp(account.config_at) }}</p>
+          {{ connection_link('config', 'Копировать ссылку подключения', 'Показать ссылку подключения', 'Прямая ссылка подключения', account.config) }}
+          <div class="connection-guide">
+            <h3>Инструкция для прямого подключения</h3>
+            <p>Выберите своё устройство и следуйте инструкции.</p>
+            {{ ordinary_guide(account.platform) }}
+          </div>
+        </div>
+      </details>
+    {% else %}
+      <p class="notice">Ссылка ещё не назначена. Обратитесь к администратору.</p>
+    {% endif %}
+  </section>
+  <section id="problem-report" class="card">
+    <h2>Не работает подключение?</h2>
+    <p>Сообщите администратору, если VPN не подключается или не открывает сайты.</p>
+    {% if report %}
+      <p class="notice" role="status">{{ 'Сообщение сохранено и будет отправлено администратору.' if report.accepted else 'Вы уже сообщили о проблеме. Повторное сообщение будет доступно через несколько минут.' }}</p>
+    {% endif %}
+    <form method="post" action="/report-problem" data-problem-report>
+      {{ csrf_field(csrf) }}
+      <button type="submit" class="button" {% if report_next %}disabled data-report-next="{{ report_next }}"{% endif %}>Сообщить о проблеме</button>
+      <p class="action-feedback" role="status">{% if report_next %}Следующее сообщение можно отправить {{ timestamp(report_next) }}.{% endif %}</p>
+    </form>
+  </section>
+</main>
+{% endblock %}

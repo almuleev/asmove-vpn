@@ -1,0 +1,9 @@
+{
+  "plan_id": 0,
+  "group_id": 0,
+  "datacenter_id": 0,
+  "template_id": 0,
+  "ssh_key_id": 0,
+  "country": "nl",
+  "daily_cost": "0.07"
+}

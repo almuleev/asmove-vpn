@@ -1,0 +1,97 @@
+{% macro subscription_guide(platform='any') %}
+  {% if platform in ('any', 'ios') %}
+  <details data-platform="ios"{% if platform == 'ios' %} open{% endif %}>
+    <summary>iPhone / iPad · V2RC</summary>
+    <ol>
+      <li><a href="https://apps.apple.com/ru/app/v2rc/id6748362312" target="_blank" rel="noopener noreferrer">Установите V2RC из App Store</a> или откройте уже установленное приложение.</li>
+      <li>В кабинете нажмите <strong>«Копировать ссылку подписки»</strong>, затем перейдите в V2RC.</li>
+      <li>На главном экране V2RC нажмите верхнюю строку с глобусом <strong>«Please import a config first»</strong>. Если подключение уже добавлено, в этой строке будет его название.</li>
+      <li>На экране <strong>Config List</strong> нажмите <strong>Import Config</strong> («Импортировать»). Если список уже заполнен, нажмите <strong>+</strong> справа сверху.</li>
+      <li>На экране <strong>Import Config</strong> выберите <strong>Subscription</strong>. В поле <strong>Subscription Name</strong> введите название, например <strong>VPN Node Guard</strong>. В поле <strong>Subscription URL</strong> вставьте скопированную ссылку подписки. Нажмите внизу <strong>Import Subscription</strong> и дождитесь загрузки списка подключений.</li>
+      <li>В списке <strong>Config List</strong> выберите подключение <strong>Connection</strong>.</li>
+      <li>Вернитесь на главный экран стрелкой <strong>‹</strong> слева сверху, если он не открылся автоматически. Проверьте, что в верхней строке выбрано <strong>Connection</strong>. Нажмите большую круглую кнопку <strong>Tap to connect</strong>. При первом запуске разрешите iOS добавить конфигурацию VPN.</li>
+      <li>Дождитесь надписи <strong>Internet OK</strong> и откройте любой сайт для проверки.</li>
+    </ol>
+  </details>
+  {% endif %}
+  {% if platform in ('any', 'android') %}
+  <details data-platform="android"{% if platform == 'android' %} open{% endif %}>
+    <summary>Android · v2rayNG</summary>
+    <p class="muted">Инструкция для v2rayNG 2.3.15. В других версиях названия и расположение кнопок могут отличаться.</p>
+    <ol>
+      <li><a href="https://github.com/2dust/v2rayNG/releases">Скачать v2rayNG для Android (APK)</a>. Откройте скачанный APK и установите приложение. Если v2rayNG уже установлен, просто откройте его.</li>
+      <li>В кабинете нажмите <strong>«Копировать ссылку подписки»</strong>. Перейдите в v2rayNG.</li>
+      <li>Нажмите <strong>☰</strong> слева сверху → <strong>«Группы»</strong>, затем <strong>+</strong> справа сверху.</li>
+      <li>В поле <strong>«Название»</strong> введите <strong>VPN Node Guard</strong>. В поле <strong>«URL (необязательно)»</strong> вставьте скопированную ссылку подписки — для нашего способа это поле нужно заполнить.</li>
+      <li>В этой же группе включите <strong>«Использовать обновление»</strong> и <strong>«Использовать автообновление»</strong>. В поле <strong>«Интервал автообновления»</strong> укажите <strong>60</strong> минут. Нажмите галочку <strong>✓</strong> справа сверху для сохранения.</li>
+      <li>Вернитесь на главный экран и выберите вкладку <strong>VPN Node Guard</strong>. Нажмите <strong>⋮</strong> справа сверху → <strong>«Обновить подписку»</strong>. Если открылось окно с дополнительными действиями, оставьте включённым только обновление подписки и нажмите <strong>«ОК»</strong>. Дождитесь появления подключений.</li>
+      <li>Нажмите профиль <strong>Connection</strong>, затем кнопку запуска <strong>▶</strong> внизу справа. Подтвердите системный запрос Android на создание VPN-подключения, если он появится.</li>
+      <li>Откройте сайт в браузере. В v2rayNG также можно нажать строку состояния внизу экрана для проверки текущего соединения.</li>
+      <li>Автообновление в Android может задерживаться из-за фоновых ограничений. Если после замены сервера подключение не работает, вручную повторите <strong>⋮ → «Обновить подписку»</strong> и подключитесь снова.</li>
+    </ol>
+  </details>
+  {% endif %}
+  {% if platform in ('any', 'windows') %}
+  <details data-platform="windows"{% if platform == 'windows' %} open{% endif %}>
+    <summary>Windows · v2rayN</summary>
+    <ol>
+      <li><a href="https://github.com/2dust/v2rayN/releases">Скачать v2rayN для Windows x64 (ZIP)</a>, распакуйте архив и запустите приложение от имени администратора. Если v2rayN уже установлен, откройте его от имени администратора.</li>
+      <li>В кабинете нажмите <strong>«Копировать ссылку подписки»</strong>. Перейдите в v2rayN.</li>
+      <li>В верхнем меню нажмите <strong>Subscription Group</strong>.</li>
+      <li>Выберите <strong>Subscription group settings</strong> («Настройки групп подписок»).</li>
+      <li>В открывшемся окне нажмите <strong>+ Add</strong> («Добавить»).</li>
+      <li>В поле <strong>Remarks</strong> введите название группы, например <strong>nodeguard</strong>. В поле <strong>URL (optional)</strong> вставьте скопированную ссылку подписки. Оставьте <strong>Enable update</strong> включённым, а в <strong>Automatic update interval (minutes)</strong> задайте <strong>60</strong>. Остальные поля менять не нужно. Нажмите <strong>Confirm</strong> и закройте окно настроек групп.</li>
+      <li>В главном окне выберите вкладку созданной группы — в примере <strong>nodeguard</strong> рядом с <strong>All</strong>.</li>
+      <li>Снова откройте <strong>Subscription Group</strong> и нажмите <strong>Update subscriptions without proxy</strong>. Дождитесь появления подключений в списке.</li>
+      <li>Выберите подключение <strong>Connection</strong> и сделайте его активным: нажмите <strong>Enter</strong> или дважды щёлкните по строке.</li>
+      <li>Внизу окна в меню <strong>Routing</strong> выберите вариант с <strong>(Global)</strong>. Включите переключатель <strong>Enable Tun</strong>. Если потребуется, подтвердите запрос Windows; приложение должно быть запущено от имени администратора.</li>
+      <li>Откройте сайт в браузере и проверьте доступ к интернету. После замены сервера обновляйте эту же подписку через <strong>Subscription Group → Update subscriptions without proxy</strong>. Повторно добавлять URL не нужно.</li>
+    </ol>
+  </details>
+  {% endif %}
+{% endmacro %}
+
+{% macro ordinary_guide(platform='any') %}
+  {% if platform in ('any', 'ios') %}
+  <details data-platform="ios"{% if platform == 'ios' %} open{% endif %}>
+    <summary>iPhone / iPad · V2RC</summary>
+    <ol>
+      <li><a href="https://apps.apple.com/ru/app/v2rc/id6748362312" target="_blank" rel="noopener noreferrer">Установите V2RC из App Store</a> или откройте уже установленное приложение.</li>
+      <li>Нажмите <strong>«Копировать ссылку подключения»</strong>. Откройте V2RC.</li>
+      <li>На главном экране нажмите верхнюю строку с глобусом <strong>Please import a config first</strong> (или название уже выбранного подключения).</li>
+      <li>На экране <strong>Config List</strong> нажмите <strong>Import Config</strong>. Если подключения уже есть, нажмите <strong>+</strong> справа сверху.</li>
+      <li>Выберите <strong>URL Import</strong>. В поле <strong>Config Name</strong> введите название, например <strong>nodeguard</strong>. В поле <strong>Config URL</strong> вставьте скопированную <strong>прямую ссылку</strong>. Нажмите <strong>Add Config</strong>. Для этого способа не выбирайте Subscription.</li>
+      <li>В списке <strong>Config List</strong> нажмите добавленное подключение с указанным вами названием — в примере <strong>nodeguard</strong>.</li>
+      <li>Вернитесь на главный экран стрелкой <strong>‹</strong>, если он не открылся автоматически. Нажмите большую круглую кнопку <strong>Tap to connect</strong>. При первом запуске разрешите iOS добавить конфигурацию VPN.</li>
+      <li>Дождитесь надписи <strong>Internet OK</strong> и откройте любой сайт для проверки.</li>
+    </ol>
+  </details>
+  {% endif %}
+  {% if platform in ('any', 'android') %}
+  <details data-platform="android"{% if platform == 'android' %} open{% endif %}>
+    <summary>Android · v2rayNG</summary>
+    <p class="muted">Инструкция для v2rayNG 2.3.15. В других версиях названия и расположение кнопок могут отличаться.</p>
+    <ol>
+      <li><a href="https://github.com/2dust/v2rayNG/releases">Скачать v2rayNG для Android (APK)</a>. Откройте скачанный APK и установите приложение. Если v2rayNG уже установлен, просто откройте его.</li>
+      <li>Нажмите <strong>«Копировать ссылку подключения»</strong>. Перейдите в v2rayNG.</li>
+      <li>Нажмите <strong>+</strong> справа сверху → <strong>«Импорт из буфера обмена»</strong> (Import from Clipboard).</li>
+      <li>Откройте вкладку <strong>Default</strong> (или <strong>«Все»</strong>, если она отображается) и нажмите добавленный профиль <strong>Connection</strong>.</li>
+      <li>Нажмите кнопку запуска <strong>▶</strong> внизу справа и подтвердите системный запрос Android на создание VPN-подключения. Откройте сайт в браузере, чтобы проверить интернет.</li>
+      <li>После замены сервера заново скопируйте прямую ссылку из кабинета и импортируйте её тем же способом. Прямая ссылка сама не обновляется.</li>
+    </ol>
+  </details>
+  {% endif %}
+  {% if platform in ('any', 'windows') %}
+  <details data-platform="windows"{% if platform == 'windows' %} open{% endif %}>
+    <summary>Windows · v2rayN</summary>
+    <ol>
+      <li><a href="https://github.com/2dust/v2rayN/releases">Скачать v2rayN для Windows x64 (ZIP)</a>, распакуйте архив и запустите приложение от имени администратора. Если v2rayN уже установлен, откройте его от имени администратора.</li>
+      <li>Нажмите <strong>«Копировать ссылку подключения»</strong>. Вернитесь в v2rayN.</li>
+      <li>В верхнем меню нажмите <strong>Configuration → Import Share Links from clipboard</strong> («Импортировать ссылки из буфера обмена»). Вместо меню можно нажать <strong>Ctrl+V</strong> в главном окне v2rayN.</li>
+      <li>Выберите вкладку <strong>All</strong>, чтобы увидеть добавленное подключение. Найдите новую строку <strong>Connection</strong> и сделайте её активной: нажмите <strong>Enter</strong> или дважды щёлкните по строке. При импорте прямой ссылки добавляется одно подключение.</li>
+      <li>Внизу окна в меню <strong>Routing</strong> выберите вариант с <strong>(Global)</strong>. Включите переключатель <strong>Enable Tun</strong>. Подтвердите запрос Windows, если он появится. Приложение должно быть запущено от имени администратора.</li>
+      <li>Откройте сайт в браузере и проверьте доступ к интернету. После замены сервера заново скопируйте прямую ссылку из кабинета и импортируйте её этим же способом. Старая прямая ссылка сама не обновляется.</li>
+    </ol>
+  </details>
+  {% endif %}
+{% endmacro %}

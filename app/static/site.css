@@ -1,0 +1,126 @@
+:root {
+  color-scheme: light;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: #172922;
+  background: #edf2ef;
+  --paper: #fff;
+  --ink: #172922;
+  --muted: #4d6259;
+  --line: #d2ddd7;
+  --accent: #175941;
+  --focus: #20775a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; line-height: 1.5; }
+button, input, select, textarea { font: inherit; }
+a { color: var(--accent); text-underline-offset: .23em; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.bar { background: #112d23; color: #f4fbf7; }
+.bar-inner {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: .7rem clamp(1rem, 4vw, 2.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4rem;
+}
+.brand { display: inline-flex; align-items: center; gap: .7rem; color: inherit; text-decoration: none; font-weight: 700; }
+.brand-mark { width: 1rem; height: 1rem; border: 2px solid #a5dfbd; border-radius: .26rem; box-shadow: inset 0 0 0 3px #112d23; background: #a5dfbd; }
+.nav-button { border: 0; color: #ecf8f1; background: transparent; cursor: pointer; min-height: 44px; padding: .35rem .55rem; }
+.nav-button:hover { text-decoration: underline; }
+.shell { width: min(100% - 2rem, 67rem); margin: clamp(1.25rem, 5vw, 4.25rem) auto; display: grid; gap: 1rem; }
+.shell-narrow { width: min(100% - 2rem, 34rem); }
+.card { min-width: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 1.1rem; padding: clamp(1.1rem, 4vw, 2rem); }
+h1, h2, p { margin: 0 0 1rem; }
+h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); line-height: 1.12; letter-spacing: -.035em; }
+h2 { font-size: 1.18rem; line-height: 1.3; }
+.heading { display: flex; align-items: center; gap: .65rem 1rem; flex-wrap: wrap; }
+.heading h1 { margin: 0; }
+.muted, .secondary-link { color: var(--muted); }
+.secondary-link { justify-self: start; padding: .35rem .2rem; }
+.stack { display: grid; gap: .85rem; }
+label { display: grid; gap: .35rem; font-weight: 600; }
+.checkbox { display: flex; align-items: center; gap: .5rem; cursor: pointer; }
+.checkbox input { width: 1.15rem; height: 1.15rem; margin: 0; accent-color: var(--accent); }
+input:not([type=hidden], [type=checkbox]), select, textarea {
+  width: 100%;
+  min-height: 46px;
+  color: var(--ink);
+  background: #f8faf9;
+  border: 1px solid #9db3a8;
+  border-radius: .55rem;
+  padding: .65rem .75rem;
+  font-weight: 400;
+  font-size: 1rem;
+}
+textarea { resize: vertical; overflow-wrap: anywhere; }
+.code { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+.button { min-height: 44px; padding: .55rem .9rem; border: 1px solid transparent; border-radius: .55rem; background: var(--accent); color: white; font-weight: 650; cursor: pointer; }
+.button:hover { background: #104330; }
+.button:disabled { opacity: .65; cursor: default; }
+.button.outline, .button.danger { color: var(--accent); border-color: #a1b7ac; background: #fff; }
+.button.danger { color: #8a2825; border-color: #d9aba9; }
+.button.outline:hover, .button.danger:hover { background: #edf2ef; }
+.compact { justify-self: start; }
+.notice { padding: .65rem .75rem; border-radius: .55rem; background: #edf5f0; }
+.notice:last-child { margin-bottom: 0; }
+.warning { background: #fdf1df; color: #73451c; }
+.action-feedback { display: block; margin: 0; }
+.action-feedback:not(:empty) { margin-top: .45rem; padding: .55rem .75rem; border-radius: .5rem; background: #edf5f0; }
+.action-feedback[data-tone="success"] { color: var(--accent); font-weight: 650; }
+.action-feedback[data-tone="warning"]:not(:empty) { color: #73451c; background: #fdf1df; }
+.admin-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.stats { display: grid; grid-template-columns: 1fr auto; gap: .5rem 1rem; font-size: .92rem; }
+.stats dt { color: var(--muted); }
+.stats dd { margin: 0; text-align: right; }
+.badge { display: inline-block; padding: .2rem .6rem; border-radius: 999px; color: #1e523c; background: #e2f0e7; font-size: .85rem; font-weight: 650; }
+.badge-disabled { color: #803a33; background: #f7e7e5; }
+.account { border-top: 1px solid var(--line); }
+.account summary { cursor: pointer; padding: .75rem 0; }
+.account-name { margin-inline: .2rem .6rem; font-weight: 700; overflow-wrap: anywhere; }
+.account-body { padding: .25rem 0 1rem; }
+.account-body > form + form { margin-top: .85rem; }
+.actions, .term-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.actions { margin-top: .85rem; }
+.audit { list-style: none; margin: 0; padding: 0; }
+.audit li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .25rem .8rem; padding: .65rem 0; border-top: 1px solid var(--line); }
+.audit time { color: var(--muted); }
+.connection-guide details { border-top: 1px solid var(--line); }
+.connection-guide summary {
+  min-height: 44px;
+  padding: .65rem .15rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+.connection-guide ol { margin: 0 0 .85rem; padding-inline-start: 1.4rem; }
+.connection-guide li + li { margin-top: .55rem; }
+.manual-link summary { padding-block: .55rem; color: var(--muted); font-size: .9rem; cursor: pointer; }
+.manual-link textarea { display: block; width: 100%; }
+@media (max-width: 46rem) {
+  .admin-grid { grid-template-columns: 1fr; }
+}
+
+/* Connection methods keep their links and instructions together. */
+.primary-method { padding: 1rem; border: 1px solid #a6c7b6; border-radius: .75rem; background: #f3f8f5; }
+.method-label { color: #175941; font-size: .8rem; font-weight: 750; letter-spacing: .03em; }
+.primary-method > .method-label { margin-top: 0; }
+.alternative-method { margin-top: 1.1rem; border: 1px solid #d2ddd7; border-radius: .75rem; }
+.alternative-method > summary { padding: .9rem 1rem; min-height: 44px; cursor: pointer; font-weight: 650; }
+.alternative-method[open] > summary { border-bottom: 1px solid #d2ddd7; }
+.method-content { padding: .25rem 1rem 1rem; }
+.connection-guide { margin-top: 1.1rem; }
+.connection-guide h3 { margin: 0 0 .6rem; font-size: 1rem; line-height: 1.4; }
+.connection-guide ol { padding-inline-start: 1.35rem; line-height: 1.55; }
+
+.guide-picture { margin: .65rem 0 1rem; }
+.guide-picture summary { cursor: pointer; font-weight: 600; }
+.guide-picture img { display: block; width: 100%; max-width: 300px; height: auto; margin-top: .6rem; border-radius: .65rem; }
+
+/* Keep each screenshot above its step separator, including when expanded. */
+.connection-guide details.guide-picture {
+  border-top: 0;
+  border-bottom: 1px solid #d2ddd7;
+  padding: .35rem 0 .85rem;
+}

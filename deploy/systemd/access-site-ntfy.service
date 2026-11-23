@@ -1,0 +1,24 @@
+[Unit]
+Description=Deliver operational notifications to ntfy independently of Telegram
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/access-site/ntfy.env
+
+[Service]
+Type=oneshot
+User=access-site
+Group=access-site
+WorkingDirectory=/opt/access-site/current
+EnvironmentFile=/etc/access-site/site.env
+EnvironmentFile=/etc/access-site/ntfy.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/access-site/current/venv/bin/python -m app.ntfy
+UMask=0077
+TimeoutStartSec=90
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/access-site/data
+CapabilityBoundingSet=
