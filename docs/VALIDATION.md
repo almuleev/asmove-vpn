@@ -10,6 +10,7 @@ Node.js 24.14.1, Git Bash. Целевой production runtime — Ubuntu 24.04 / 
 | Чистый venv: pip install requirements-dev с constraints | Успешно, Markdown 3.10.2 включён только в dev |
 | pip check | No broken requirements found |
 | Python unittest | 141 тест: 140 прошли, 1 явно пропущен (age binaries отсутствуют) |
+| Ubuntu 24.04 / Python 3.12 / Node 22 в GitHub Actions | [Первый успешный CI](https://github.com/almuleev/asmove-vpn/actions/runs/45280854389): 141 Python-тест без пропуска age, 4 Node-теста, build, ссылки и Bash syntax |
 | Node: текущий cabinet.js | 4 теста прошли; сеть замокана |
 | Bash syntax | Все 6 shell entrypoints прошли bash -n; установщики не запускались |
 | Python compileall | app, deploy, tools: успешно |
@@ -48,7 +49,7 @@ Node.js 24.14.1, Git Bash. Целевой production runtime — Ubuntu 24.04 / 
 - Реальные аренда/удаление/замена VPS, сетевые HTTPS-запросы через этот новый VPN.
 - Клиенты Windows/Android/iOS/macOS/Linux и сети пользователей.
 - Настоящий age encryption roundtrip локально (модульные проверки пакета/overwrite
-  прошли; Linux CI установит age и запустит этот тест).
+  прошли; Linux CI установил age и выполнил этот тест).
 - Внешний backup restore на двух чистых узлах, уведомления Telegram/ntfy.
 - Реальный эксплуатационный результат не выводится из успешного CI или публикации Pages.
 
