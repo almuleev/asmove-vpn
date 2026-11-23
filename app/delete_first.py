@@ -110,6 +110,14 @@ class DeleteFirstRunner:
             raise InfrastructureError('configuration_changed')
         if first_delete and job['expires'] <= timestamp():
             raise InfrastructureError('approval_expired_before_deletion')
+        if spec.get('automatic'):
+            from .automation import eligible, failed, read
+            with connect(self.control.path) as db:
+                policy = read(db)
+                allowed = eligible(db, job['node'], config, timestamp(), excluding=job['id'],
+                                   expected_policy=spec.get('automation_policy'))
+            if not allowed or not failed(self.ops.automation_probe(spec['old']), policy, config):
+                raise InfrastructureError('automatic_recovery_conditions_changed')
         if spec['old']['country'] == 'ru' or spec['old']['service_id'] <= 0:
             raise InfrastructureError('invalid_delete_target')
         return spec
@@ -155,6 +163,8 @@ class DeleteFirstRunner:
                     self.status(job, 'waiting_delete')
                     return
                 self.ops.before_delete(job, config)
+                if spec.get('automatic'):
+                    self.gate(job, load_config(self.control.config_path), first_delete=True)
                 self.ops.save_journal(job, {**journal, 'delete_intent': timestamp()})
                 try:
                     self.provider.delete(spec['old']['service_id'])
@@ -182,7 +192,7 @@ class DeleteFirstRunner:
                 old = self.provider.server_or_none(spec['old']['service_id'])
                 if old is not None and old.get('status') != 'deleted':
                     raise InfrastructureError('old_service_still_exists')
-                found = self.provider.reconcile('nodeguard-'+job['id'])
+                found = self.provider.reconcile('asmove-'+job['id'])
                 if found:
                     self.status(job, 'provisioning', service_id=found)
                     return
@@ -200,7 +210,7 @@ class DeleteFirstRunner:
                 current = self.job(job['id'])
                 self.ops.save_journal(job, {**journal, 'order_intent': timestamp()})
                 try:
-                    service = self.provider.order('nodeguard-'+job['id'], spec['candidate'])
+                    service = self.provider.order('asmove-'+job['id'], spec['candidate'])
                 except Exception as error:
                     from .vdsina import ProviderValidationError
                     if isinstance(error, ProviderValidationError):
@@ -211,7 +221,7 @@ class DeleteFirstRunner:
                     return
                 self.status(current, 'provisioning', service_id=service)
             elif state in ('ordering', 'uncertain'):
-                found = self.provider.reconcile('nodeguard-'+job['id'])
+                found = self.provider.reconcile('asmove-'+job['id'])
                 if found:
                     self.status(job, 'provisioning', service_id=found, error='')
                 elif timestamp()-job['updated'] > config['setup_timeout']:
@@ -220,7 +230,7 @@ class DeleteFirstRunner:
                 if timestamp()-job['updated'] > config['setup_timeout']:
                     raise InfrastructureError('stage_timeout')
                 service = self.provider.server(job['service_id'])
-                if service.get('name') != 'nodeguard-'+job['id']:
+                if service.get('name') != 'asmove-'+job['id']:
                     raise InfrastructureError('provider_identity_mismatch')
                 if service.get('status') != 'active':
                     return

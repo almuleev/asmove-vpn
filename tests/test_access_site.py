@@ -231,7 +231,7 @@ class AccessSiteTests(unittest.TestCase):
     def test_github_cabinet_reports_problems_without_reserve_permissions_or_controller(self):
         _, enabled_code = self.create_user("portal-enabled", reserve_enabled=True)
         _, disabled_code = self.create_user("portal-disabled")
-        origin = "https://nodeguard.github.io";prefix = "/api/cabinet"
+        origin = "https://asmove.github.io";prefix = "/api/cabinet"
         app = create_app(replace(self.settings, portal_origin=origin, emergency_controller="https://controller.example"))
         with (TestClient(app, base_url=PRIMARY, follow_redirects=False) as user,
               patch.object(admin_relay, "exchange") as relay, patch.object(Panel, "issue") as issue):

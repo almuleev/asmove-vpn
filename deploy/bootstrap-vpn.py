@@ -20,9 +20,10 @@ from urllib.parse import urlsplit
 from uuid import uuid4
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 CURRENT = Path('/opt/access-site/current')
 CONTROL = Path('/var/lib/access-site/control')
-PRIVATE = Path('/var/lib/nodeguard-bootstrap')
+PRIVATE = Path('/var/lib/asmove-bootstrap')
 SCRIPTS = ('vpn-lifecycle.py', 'delete-first.py', 'vpn_recovery.py', 'lifecycle-result.py',
            'xui_setup.py', 'install-3x-ui-remote.py', 'vpn-probe.py',
            'notification-proxy.py', 'tcp-relay.py', 'vpn-tls.py', 'export-state.py')
@@ -30,7 +31,7 @@ SCRIPTS = ('vpn-lifecycle.py', 'delete-first.py', 'vpn_recovery.py', 'lifecycle-
 
 def validate(value):
     allowed = {'eu_ip', 'eu_service_id', 'eu_host_fingerprint', 'country', 'datacenter_id',
-               'vdsina_token_file', 'candidates', 'telegram_env_file', 'ntfy_env_file', 'recovery_archive_file'}
+               'vdsina_token_file', 'candidates', 'telegram_env_file', 'ntfy_env_file', 'recovery_archive_file', 'automation'}
     if set(value)-allowed:
         raise ValueError('Unknown configuration keys: '+', '.join(sorted(set(value)-allowed)))
     address = ipaddress.IPv4Address(value['eu_ip'])
@@ -58,6 +59,10 @@ def validate(value):
             correct_price = False
         if (not correct_price or not re.fullmatch(r'[a-z]{2}', row.get('country', '')) or row.get('country') == 'ru'):
             raise ValueError('Replacement candidates must cost exactly USD 0.07/day abroad')
+    from app.automation import validate as validate_automation
+    policy = validate_automation(value.get("automation", {}))
+    if policy["enabled"] and not candidates:
+        raise ValueError("Automatic recovery needs provider token and candidates")
     return value
 
 
@@ -99,7 +104,7 @@ def pin_host(ip, service, expected):
     fingerprint = 'SHA256:'+base64.b64encode(hashlib.sha256(base64.b64decode(fields[2], validate=True)).digest()).decode().rstrip('=')
     if fingerprint != expected:
         raise ValueError('SSH host key fingerprint mismatch; connection was not trusted')
-    alias = 'nodeguard-service-'+str(service)
+    alias = 'asmove-service-'+str(service)
     path = CONTROL/'known_hosts'; old = path.read_text() if path.exists() else ''
     retained = [line for line in old.splitlines() if not line.startswith(alias+' ')]
     previous = [line for line in old.splitlines() if line.startswith(alias+' ')]
@@ -177,7 +182,7 @@ def connect(config):
     group = grp.getgrnam('access-site').gr_gid
     for path in (lc.PROBES, lc.PUBLIC, settings.data_dir/'probes'):
         path.mkdir(parents=True, exist_ok=True); path.chmod(0o750); os.chown(path, 0, group)
-    script_dir = Path('/opt/nodeguard-control/deploy'); script_dir.mkdir(parents=True, mode=0o755, exist_ok=True)
+    script_dir = Path('/opt/asmove-control/deploy'); script_dir.mkdir(parents=True, mode=0o755, exist_ok=True)
     script_dir.parent.chmod(0o755); script_dir.chmod(0o755)
     for name in SCRIPTS:
         shutil.copyfile(ROOT/'deploy'/name, script_dir/name); (script_dir/name).chmod(0o644)
@@ -185,10 +190,10 @@ def connect(config):
     marker = settings.origin+' '+state['job_id']
     remote = ("set -eu\n. /etc/os-release\n[ \"$ID\" = ubuntu ] && [ \"$VERSION_ID\" = 24.04 ]\n"
               "[ \"$(uname -m)\" = x86_64 ]\n"
-              "if [ -e /etc/x-ui/x-ui.db ]; then [ -f /var/lib/nodeguard-bootstrap-owner ] && "
-              "[ \"$(cat /var/lib/nodeguard-bootstrap-owner)\" = "+shlex.quote(marker)+" ]; fi\n"
-              "printf '%s\\n' "+shlex.quote(marker)+" > /var/lib/nodeguard-bootstrap-owner\n"
-              "chmod 600 /var/lib/nodeguard-bootstrap-owner\n"
+              "if [ -e /etc/x-ui/x-ui.db ]; then [ -f /var/lib/asmove-bootstrap-owner ] && "
+              "[ \"$(cat /var/lib/asmove-bootstrap-owner)\" = "+shlex.quote(marker)+" ]; fi\n"
+              "printf '%s\\n' "+shlex.quote(marker)+" > /var/lib/asmove-bootstrap-owner\n"
+              "chmod 600 /var/lib/asmove-bootstrap-owner\n"
               "export DEBIAN_FRONTEND=noninteractive\napt-get update\n"
               "apt-get install -y --no-install-recommends python3 ca-certificates curl openssl iproute2 tar gzip xz-utils\n")
     lc.run([*lc.ssh_args(ip, service), 'root@'+ip, 'sh -s'], data=remote.encode(), timeout=600)
@@ -237,7 +242,7 @@ def connect(config):
         vpn_recovery.restore_panel(lc, job, ip, directory, data)
     lc.provision(job, ip, directory)
     details = json.loads((directory/'node.json').read_text())
-    binaries = Path('/opt/nodeguard-control/bin'); binaries.mkdir(mode=0o755, parents=True, exist_ok=True); binaries.chmod(0o755)
+    binaries = Path('/opt/asmove-control/bin'); binaries.mkdir(mode=0o755, parents=True, exist_ok=True); binaries.chmod(0o755)
     scp = ['scp', *lc.ssh_args(ip, service)[2:], 'root@'+ip+':/usr/local/x-ui/bin/xray-linux-amd64', str(binaries/'xray.new')]
     run(scp, timeout=180)
     expected = lc.run([*lc.ssh_args(ip, service), 'root@'+ip, 'sha256sum /usr/local/x-ui/bin/xray-linux-amd64']).decode().split()[0]
@@ -245,7 +250,7 @@ def connect(config):
         raise ValueError('Observer Xray transfer checksum mismatch')
     (binaries/'xray.new').chmod(0o755); os.replace(binaries/'xray.new', binaries/'xray')
     observer = {'xray': str(binaries/'xray'), 'curl': '/usr/bin/curl',
-                'check_url': 'https://www.gstatic.com/generate_204', 'nodes': {'EU1': str(template_path)},
+                'check_urls': ['https://www.gstatic.com/generate_204', 'https://www.cloudflare.com/cdn-cgi/trace'], 'nodes': {'EU1': str(template_path)},
                 'replacement_directory': str(lc.PROBES)}
     write(observer_path, json.dumps(observer), public=True)
     write(template_path, json.dumps(lc.client_template(details['link'])), public=True)
@@ -265,7 +270,7 @@ def connect(config):
         write(settings.data_dir/'ntfy-connection.json', json.dumps({'url': optional['ntfy']['NTFY_URL']}), public=True)
         run(['systemctl', 'enable', '--now', 'access-site-ntfy.timer'])
     if 'telegram' in optional:
-        write(CONTROL/'notification-targets.json', json.dumps({'EU1': {'ip': ip, 'alias': 'nodeguard-service-'+str(service)}}))
+        write(CONTROL/'notification-targets.json', json.dumps({'EU1': {'ip': ip, 'alias': 'asmove-service-'+str(service)}}))
         shutil.copyfile(ROOT/'deploy/systemd/access-site-notification-proxy.service', '/etc/systemd/system/access-site-notification-proxy.service')
         run(['systemctl', 'daemon-reload'])
         run(['systemctl', 'enable', '--now', 'access-site-notification-proxy.service', 'access-site-events.timer', 'access-site-reminders.timer'])
@@ -273,11 +278,19 @@ def connect(config):
     report = Worker(Infrastructure(settings.data_dir, config_path)).probe(node)
     if not any(p['region']=='ru' and p['observer_ok'] and p['vpn_ok'] for p in report['probes']):
         raise ValueError('End-to-end VPN check from the RU controller failed')
+    from app.automation import save as save_automation
+    save_automation(Infrastructure(settings.data_dir, config_path), config.get('automation', {}),
+                    accept_downtime=config.get('automation', {}).get('enabled') is True)
+    # Root may create this shared control DB before the first web/monitor tick.
+    # Keep the authoritative web/worker database owned by the application user.
+    import pwd
+    infrastructure_db = settings.data_dir/'infrastructure.sqlite3'
+    os.chown(infrastructure_db, pwd.getpwnam('access-site').pw_uid, group)
     run(['systemctl', 'enable', '--now', 'access-site-infrastructure.timer'])
     if provider:
         run(['systemctl', 'enable', '--now', 'access-site-delete-first.timer'])
     result = {'ready': True, 'ip': ip, 'port': 2053, 'vpn_verified': True,
-              'replacement_requires_admin': True, 'replacement_enabled': provider,
+              'replacement_requires_admin': not config.get('automation', {}).get('enabled', False), 'replacement_enabled': provider,
               'accounts': len(Store(settings.data_dir).overview()[0])}
     write(directory/'complete.json', json.dumps(result))
     return result

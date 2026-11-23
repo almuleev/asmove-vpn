@@ -26,13 +26,13 @@
 На EU команды сертификата:
 
 ```bash
-systemctl status nodeguard-vpn-tls.timer --no-pager
-journalctl -u nodeguard-vpn-tls.service -n 40 --no-pager
-openssl x509 -in /etc/nodeguard-vpn-tls/fullchain.pem -noout -dates -ext subjectAltName
+systemctl status asmove-vpn-tls.timer --no-pager
+journalctl -u asmove-vpn-tls.service -n 40 --no-pager
+openssl x509 -in /etc/asmove-vpn-tls/fullchain.pem -noout -dates -ext subjectAltName
 ```
 
-Одна HTTP-цель проверки может отказать независимо от VPN. Перед подтверждением
+Отдельная HTTPS-цель может отказать независимо от VPN. Стандартная установка
+использует две цели с прямым контролем наблюдателя. Перед подтверждением
 дорогой/необратимой операции проверьте другую HTTPS-цель через VPN и состояние
-провайдера. Автоматической независимой классификации причин и нескольких целей
-в стандартной установке пока нет. Белые списки мобильных сетей могут блокировать
+провайдера. Автоматической независимой классификации причин пока нет. Белые списки мобильных сетей могут блокировать
 и новые адреса; смена IP сама по себе не обещает восстановления.

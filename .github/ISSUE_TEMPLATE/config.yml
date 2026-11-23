@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Вопросы и опыт установки / Help and setup reports
+    url: https://github.com/almuleev/asmove-vpn/discussions
+    about: Помощь с настройкой и обсуждение опыта использования.
+  - name: Сообщить об уязвимости приватно / Private vulnerability report
+    url: https://github.com/almuleev/asmove-vpn/security/advisories/new
+    about: Не публикуйте детали уязвимостей в общих обсуждениях.

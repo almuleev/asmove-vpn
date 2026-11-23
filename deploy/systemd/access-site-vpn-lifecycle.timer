@@ -1,5 +1,5 @@
 [Unit]
-Description=Process approved VPN Node Guard deployment jobs
+Description=Process approved ASMove VPN deployment jobs
 
 [Timer]
 OnBootSec=45s

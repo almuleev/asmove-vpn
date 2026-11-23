@@ -9,7 +9,7 @@
 /usr/local/sbin/access-site status
 /usr/local/sbin/access-site check-panel
 systemctl status access-site.service --no-pager
-systemctl list-timers 'access-site-*' 'nodeguard-*'
+systemctl list-timers 'access-site-*' 'asmove-*'
 journalctl -u access-site-infrastructure.service -n 50 --no-pager
 journalctl -u access-site-delete-first.service -n 50 --no-pager
 ```
@@ -20,6 +20,12 @@ Nginx обслуживает HTTPS, приложение слушает loopback
 root SSH-туннель ведёт к loopback-панели EU. Таймер infrastructure проверяет VPN,
 delete-first выполняет подтверждённые jobs, backup сохраняет основную базу.
 Сертификаты обновляются отдельно. Ошибка уведомлений не блокирует админку.
+
+## Автоматический режим
+
+Его включают в админке → Серверы и замены → Автоматическое восстановление.
+Пороги, пределы, остановка и поведение после удаления: [AUTOMATION.md](AUTOMATION.md).
+Ручные подтверждения ниже относятся к ручному режиму.
 
 ## Замена EU при живом RU
 
@@ -44,7 +50,7 @@ auth_version, сроки, данные x-ui и ручные клиенты из 
 При недостатке средств/нет тарифа — attention; после удаления простой продолжается.
 При timeout — сверка инвентаря по текущему job, не новый заказ. Не нажимайте DELETE
 вручную параллельно исполнителю. Приватный журнал:
-`/var/lib/nodeguard-delete-first/jobs/JOB_ID/`; он может содержать секреты панели.
+`/var/lib/asmove-delete-first/jobs/JOB_ID/`; он может содержать секреты панели.
 Перед повтором после attention изучите причину и используйте продолжение той же
 заявки, сохраняя журнал. Не редактируйте SQL/jobs ради обхода неизвестного результата.
 
@@ -58,11 +64,11 @@ auth_version, сроки, данные x-ui и ручные клиенты из 
 | /var/lib/access-site/data/accounts.sqlite3 | Основная база пользователей |
 | /var/lib/access-site/data/local.sqlite3 | Сеансы/локальная авторизация |
 | /var/lib/access-site/infrastructure.json | Конфигурация; актуальный адрес также может быть в overrides БД |
-| /opt/nodeguard-control/deploy | Root-owned исполнители |
+| /opt/asmove-control/deploy | Root-owned исполнители |
 | /var/lib/access-site/control | Приватный SSH key и pinned known_hosts, только root |
-| /var/lib/nodeguard-delete-first | Архивы, journal, recovery state |
+| /var/lib/asmove-delete-first | Архивы, journal, recovery state |
 | EU: /etc/x-ui/x-ui.db | База 3x-ui |
-| EU: /etc/nodeguard-vpn-tls | Ключ и цепочка сертификата IP |
+| EU: /etc/asmove-vpn-tls | Ключ и цепочка сертификата IP |
 
 `SITE_ACCESS_KEY` не меняйте на живой базе. Коды в vault зашифрованы ключом,
 производным от него; хэши используются для входа. Подписки и VPN URI — секреты
@@ -87,15 +93,15 @@ auth_version, сроки, данные x-ui и ручные клиенты из 
 
 ```bash
 umask 077
-age-keygen -o nodeguard-backup.agekey
-age-keygen -y nodeguard-backup.agekey > backup-recipient.txt
+age-keygen -o asmove-backup.agekey
+age-keygen -y asmove-backup.agekey > backup-recipient.txt
 ```
 
 На RU передайте **только публичный** recipient. Затем на RU:
 
 ```bash
-cd /opt/nodeguard-src
-/opt/access-site/current/venv/bin/python deploy/export-state.py --recipient-file /root/backup-recipient.txt --output /root/nodeguard-backup-UNIQUE.tar.age
+cd /opt/asmove-src
+/opt/access-site/current/venv/bin/python deploy/export-state.py --recipient-file /root/backup-recipient.txt --output /root/asmove-backup-UNIQUE.tar.age
 ```
 
 Замените UNIQUE на новое имя; существующий файл не перезаписывается. Export
@@ -112,9 +118,9 @@ cd /opt/nodeguard-src
 
 ```bash
 umask 077
-mkdir nodeguard-restore
-age -d -i /PRIVATE/PATH/nodeguard-backup.agekey -o nodeguard-restore/backup.tar /PRIVATE/PATH/backup.tar.age
-tar -xzf nodeguard-restore/backup.tar -C nodeguard-restore
+mkdir asmove-restore
+age -d -i /PRIVATE/PATH/asmove-backup.agekey -o asmove-restore/backup.tar /PRIVATE/PATH/backup.tar.age
+tar -xzf asmove-restore/backup.tar -C asmove-restore
 ```
 
 В извлечённом `etc-access-site/site.env` сохраните **только исходный SITE_ACCESS_KEY**
@@ -123,9 +129,9 @@ tar -xzf nodeguard-restore/backup.tar -C nodeguard-restore
 На новом RU с проверенными исходниками:
 
 ```bash
-cd /opt/nodeguard-src
+cd /opt/asmove-src
 bash deploy/bootstrap-host.sh REPLACE_NEW_RU_IPV4 '' /root/original-site-access-key
-/usr/local/sbin/access-site restore /root/nodeguard-restore/accounts.sqlite3
+/usr/local/sbin/access-site restore /root/asmove-restore/accounts.sqlite3
 ```
 
 При необходимости восстановите transport policy до EU. Подготовьте новый EU и
@@ -168,10 +174,10 @@ IP источников; отдельная настройка не входит
 
 Удаление сервиса **не отменяет аренду VPS**. До удаления ПО завершите/разберите
 текущие jobs, сохраните export и отключите таймеры замены/наблюдения/уведомлений.
-Проверьте список `systemctl list-unit-files 'access-site-*' 'nodeguard-*'`, остановите
+Проверьте список `systemctl list-unit-files 'access-site-*' 'asmove-*'`, остановите
 найденные units, затем удаляйте только их файлы и Nginx site `access-site.conf`.
 Сделайте `systemctl daemon-reload`, `nginx -t`, reload Nginx. На EU остановите x-ui
-и nodeguard-vpn-tls.timer перед удалением их файлов. Точный список путей приведён
+и asmove-vpn-tls.timer перед удалением их файлов. Точный список путей приведён
 выше; не удаляйте системный Nginx/Python/Certbot других сайтов.
 Полного автоматического uninstall нет. VPS отменяются вручную в своём кабинете
 провайдера после проверки резервной копии. Эта локальная работа их не отменяет.

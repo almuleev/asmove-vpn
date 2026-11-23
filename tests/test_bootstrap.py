@@ -53,7 +53,7 @@ class BootstrapTests(unittest.TestCase):
             self.assertFalse((Path(directory)/'known_hosts').exists())
             bootstrap.pin_host('1.1.1.1', 1, fingerprint)
             pinned = (Path(directory)/'known_hosts').read_text()
-            self.assertIn('nodeguard-service-1 ssh-ed25519 ', pinned)
+            self.assertIn('asmove-service-1 ssh-ed25519 ', pinned)
             bootstrap.pin_host('1.1.1.1', 1, fingerprint)
             self.assertEqual((Path(directory)/'known_hosts').read_text(), pinned)
             with patch.object(bootstrap, 'run', return_value=('1.1.1.1 ssh-ed25519 '+base64.b64encode(b'other').decode()+'\n').encode()):

@@ -12,7 +12,7 @@ EnvironmentFile=/etc/access-site/site.env
 EnvironmentFile=-/etc/access-site/infrastructure.env
 UnsetEnvironment=VDSINA_SOCKS_PROXY
 Environment=PYTHONDONTWRITEBYTECODE=1
-ExecStart=/opt/access-site/current/venv/bin/python /opt/nodeguard-control/deploy/delete-first.py
+ExecStart=/opt/access-site/current/venv/bin/python /opt/asmove-control/deploy/delete-first.py
 UMask=0077
 TimeoutStartSec=18min
 PrivateTmp=yes

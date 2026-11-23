@@ -1,8 +1,10 @@
-# Установка с нуля
+# Подробная ручная установка
+
+Для первого запуска рекомендуем [мастер для новичка](QUICKSTART.md). Ниже — ручной путь без мастера.
 
 Маршрут: вручную арендуете RU, устанавливаете контроллер, вручную создаёте первый
 EU в VDSina.com с ключом RU, затем подключаете EU к контроллеру. Bootstrap **не
-заказывает VPS**. Позднейшие замены через API требуют подтверждения в админке.
+заказывает VPS**. Позднейшие замены через API выполняются вручную или по явно включённым [правилам автоматики](AUTOMATION.md).
 На уже установленном узле используйте обновление, а не bootstrap.
 
 ## Подготовка: где выполнять команды
@@ -53,11 +55,11 @@ ssh -o HostKeyAlgorithms=ssh-ed25519 root@REPLACE_RU_IPV4
 ## 3. Передать проверенный исходный код на RU
 
 До публикации основной путь — архив текущего локального коммита, без .git и секретов.
-На компьютере в папке VPN Node Guard:
+На компьютере в папке ASMove VPN:
 
 ```text
-git archive --format=tar --output=nodeguard-source.tar HEAD
-scp nodeguard-source.tar root@REPLACE_RU_IPV4:/root/nodeguard-source.tar
+git archive --format=tar --output=asmove-source.tar HEAD
+scp asmove-source.tar root@REPLACE_RU_IPV4:/root/asmove-source.tar
 ```
 
 После публикации можно вместо этого клонировать **свой новый** репозиторий и
@@ -67,9 +69,9 @@ scp nodeguard-source.tar root@REPLACE_RU_IPV4:/root/nodeguard-source.tar
 На RU:
 
 ```bash
-install -d -m 0755 /opt/nodeguard-src
-tar -xf /root/nodeguard-source.tar -C /opt/nodeguard-src
-cd /opt/nodeguard-src
+install -d -m 0755 /opt/asmove-src
+tar -xf /root/asmove-source.tar -C /opt/asmove-src
+cd /opt/asmove-src
 bash deploy/bootstrap-host.sh REPLACE_RU_IPV4
 ```
 
@@ -140,7 +142,7 @@ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub -E sha256
 
 ## 6. Найти реальные ID для будущих замен
 
-На RU из `/opt/nodeguard-src` выполните read-only команды:
+На RU из `/opt/asmove-src` выполните read-only команды:
 
 ```bash
 /opt/access-site/current/venv/bin/python deploy/provider-read.py groups --token-file /root/vdsina.token
@@ -167,8 +169,8 @@ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub -E sha256
 На RU:
 
 ```bash
-install -m 0600 deploy/bootstrap.example.json /root/nodeguard-bootstrap.local.json
-nano /root/nodeguard-bootstrap.local.json
+install -m 0600 deploy/bootstrap.example.json /root/asmove-bootstrap.local.json
+nano /root/asmove-bootstrap.local.json
 ```
 
 Заполните IP/service ID/datacenter первого EU, проверенный `eu_host_fingerprint`,
@@ -179,15 +181,15 @@ nano /root/nodeguard-bootstrap.local.json
 Telegram/ntfy можно оставить `null`, затем настроить по [OPERATIONS](OPERATIONS.md).
 
 ```bash
-chmod 600 /root/nodeguard-bootstrap.local.json
-/opt/access-site/current/venv/bin/python deploy/bootstrap-vpn.py /root/nodeguard-bootstrap.local.json --check
-/opt/access-site/current/venv/bin/python deploy/bootstrap-vpn.py /root/nodeguard-bootstrap.local.json
+chmod 600 /root/asmove-bootstrap.local.json
+/opt/access-site/current/venv/bin/python deploy/bootstrap-vpn.py /root/asmove-bootstrap.local.json --check
+/opt/access-site/current/venv/bin/python deploy/bootstrap-vpn.py /root/asmove-bootstrap.local.json
 ```
 
 `--check` проверяет только структуру JSON, без SSH/API; он не доказывает правильность
 ID, баланса или доступность тарифа. Реальный запуск устанавливает EU, закрепляет
 host key, выдаёт новый сертификат IP и проверяет HTTPS через Xray с RU. Ожидается
-`ready: true`, `vpn_verified: true`, `replacement_requires_admin: true`.
+`ready: true`, `vpn_verified: true`, `replacement_requires_admin: true` для ручного режима.
 При несовпадении отпечатка остановитесь и сверьтесь через консоль. При неудаче
 VPN-проверки новые ссылки не должны публиковаться; не обходите gate.
 Повтор с тем же конфигом продолжает собственную незавершённую установку;
@@ -238,12 +240,12 @@ Connection → запуск; разрешите VPN системным диал�
 ```bash
 /usr/local/sbin/access-site status
 /usr/local/sbin/access-site check-panel
-systemctl list-timers 'access-site-*' 'nodeguard-*'
+systemctl list-timers 'access-site-*' 'asmove-*'
 /usr/local/sbin/access-site backup
 ```
 
 Ожидается активный мониторинг и свежая копия. Скопируйте зашифрованный экспорт
 за пределы RU и проверьте восстановление. Замены не запускайте ради приёмки.
-При настоящем сбое изучите причины, подготовьте замену и подтвердите точный IP
-и простой. Подробный порядок — [OPERATIONS.md](OPERATIONS.md).
+При настоящем сбое используйте выбранный режим: ручное подтверждение IP/простоя
+или заранее включённые правила автоматики. Подробный порядок — [OPERATIONS.md](OPERATIONS.md).
 Отдельный Pages-кабинет необязателен: [PUBLISHING.md](PUBLISHING.md).

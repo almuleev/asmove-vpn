@@ -1,6 +1,6 @@
 """Run on an independent observer with its own Xray and private client configs.
 
-Usage: python3 vpn-probe.py /etc/nodeguard-probe.json
+Usage: python3 vpn-probe.py /etc/asmove-probe.json
 Input is the worker's JSON node. Only public node addresses are accepted.
 """
 
@@ -10,6 +10,7 @@ from pathlib import Path
 import socket
 import subprocess
 import sys
+from urllib.parse import urlsplit
 import tempfile
 import time
 
@@ -20,14 +21,23 @@ def check(config, node):
     if not ipaddress.ip_address(node["ip"]).is_global or type(node["port"]) is not int or not 1 <= node["port"] <= 65535:
         raise ValueError("Invalid public endpoint")
     curl = settings["curl"]
-    target = settings["check_url"]
-    if not Path(curl).is_absolute() or not target.startswith("https://"):
-        raise ValueError("Expected absolute curl path and HTTPS check URL")
+    targets = settings.get("check_urls", [settings.get("check_url")])
+    if not isinstance(targets, list) or not 1 <= len(targets) <= 2:
+        raise ValueError("Expected one or two HTTPS check URLs")
+    hosts = set()
+    for target in targets:
+        parsed = urlsplit(target)
+        if (parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password
+                or parsed.fragment):
+            raise ValueError("Expected HTTPS target without credentials")
+        hosts.add(parsed.hostname)
+    if len(hosts) != len(targets) or not Path(curl).is_absolute():
+        raise ValueError("Use different destination hosts and an absolute curl path")
     options = [curl, "--silent", "--show-error", "--fail", "--max-time", "5", "--output", "/dev/null"]
-    # Direct control establishes that the observer itself can reach the destination.
-    direct = subprocess.run([*options, "--noproxy", "*", target], capture_output=True, timeout=7)
-    if direct.returncode:
-        return {"observer_ok": False, "vpn_ok": False}
+    # A failure of any direct control makes this cycle inconclusive.
+    if any(subprocess.run([*options, "--noproxy", "*", target], capture_output=True, timeout=7).returncode
+           for target in targets):
+        return {"observer_ok": False, "vpn_ok": False, "targets_total": len(targets)}
     template_path = None
     if settings.get("replacement_directory"):
         # A replacement has its own REALITY keys and probe identity.
@@ -50,7 +60,7 @@ def check(config, node):
     template["routing"] = {"rules": []}
     if not Path(settings["xray"]).is_absolute():
         raise ValueError("Expected an absolute Xray executable path")
-    with tempfile.TemporaryDirectory(prefix="nodeguard-probe-") as directory:
+    with tempfile.TemporaryDirectory(prefix="asmove-probe-") as directory:
         path = Path(directory) / "client.json"
         path.write_text(json.dumps(template), encoding="utf-8")
         path.chmod(0o600)
@@ -69,9 +79,12 @@ def check(config, node):
                         time.sleep(0.05)
                 if not listening:
                     return {"observer_ok": False, "vpn_ok": False}
-                reply = subprocess.run([*options, "--noproxy", "", "--proxy", f"socks5h://127.0.0.1:{local_port}", target],
-                                       capture_output=True, timeout=7)
-                return {"observer_ok": True, "vpn_ok": reply.returncode == 0}
+                # One successful destination proves traffic still passes. Replacing
+                # a VPS because one website is down would be a false positive.
+                working = any(subprocess.run([*options, "--noproxy", "", "--proxy",
+                              f"socks5h://127.0.0.1:{local_port}", target],
+                              capture_output=True, timeout=7).returncode == 0 for target in targets)
+                return {"observer_ok": True, "vpn_ok": working, "targets_total": len(targets)}
             finally:
                 xray.terminate()
                 try:

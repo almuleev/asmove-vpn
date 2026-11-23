@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "macros.html" import csrf_field, logout, timestamp %}
-{% block title %}Серверы · VPN Node Guard{% endblock %}
+{% block title %}Серверы · ASMove VPN{% endblock %}
 {% block nav %}{{ logout(csrf) }}{% endblock %}
 {% block body %}
 <main class="shell">
@@ -8,6 +8,26 @@
   <p><a href="/admin">Вернуться в админку</a></p>
   <p>Проверки и замена запускаются с российского сервера. Доступность Telegram на управление не влияет.</p>
   <p><a class="button outline" href="/admin/infrastructure">Обновить состояние</a></p>
+  <section class="card">
+    <h2>Автоматическое восстановление</h2>
+    <p>Если VPN долго не отвечает, система может удалить старый зарубежный VPS и создать новый через API. Подписки сохранятся; во время замены VPN не работает.</p>
+    <form method="post" action="/admin/infrastructure/settings/automation">
+      {{ csrf_field(csrf) }}
+      <label><input type="checkbox" name="enabled" value="yes" {% if automation.enabled %}checked{% endif %}> Включить автозамену</label>
+      <label>Когда менять сервер<select name="trigger">
+        <option value="vpn_failed" {% if automation.trigger == 'vpn_failed' %}selected{% endif %}>Не проходят HTTPS-запросы через VPN</option>
+        <option value="tcp_and_vpn_failed" {% if automation.trigger == 'tcp_and_vpn_failed' %}selected{% endif %}>Не работают и VPN, и TCP-порт</option>
+      </select></label>
+      <label>Неудачных проверок подряд<input type="number" name="failures" min="3" max="20" value="{{ automation.failures }}" required></label>
+      <label>Минимальная длительность сбоя, секунд<input type="number" name="failure_seconds" min="120" max="3600" value="{{ automation.failure_seconds }}" required></label>
+      <label>Пауза между автозаменами, секунд<input type="number" name="cooldown_seconds" min="600" max="86400" value="{{ automation.cooldown_seconds }}" required></label>
+      <label>Максимум автозамен за скользящие 24 часа<input type="number" name="max_per_day" min="1" max="10" value="{{ automation.max_per_day }}" required></label>
+      <label><input type="checkbox" name="accept_automatic_downtime" value="yes"> Разрешаю автоматическое удаление старого VPS, заказ нового и простой по этим правилам</label>
+      <button class="button" type="submit">Сохранить правила</button>
+    </form>
+    <p>Сбой самого наблюдателя или одной проверочной страницы не запускает замену. Нужны две разные HTTPS-цели. Перед удалением условия проверяются заново. Неизвестный ответ API останавливает новые заказы.</p>
+    <p>Выключение останавливает новые автоматические удаления. Уже начатая замена продолжает восстановление.</p>
+  </section>
   <section class="card">
     <h2>Уведомления</h2>
     <p>Telegram. Сообщений в очереди: <strong>{{ queued_notifications }}</strong>.</p>
@@ -22,7 +42,7 @@
   <section class="card">
     <h2>Параметры замены</h2>
     <p>Режим — {{ 'имитация' if config.mode == 'simulate' else 'заказ через API' }}.</p>
-    <p>Каждую замену запускает администратор.</p>
+    <p>{{ "Автозамена включена по правилам владельца." if automation.enabled else "Ручной режим: каждую замену подтверждает администратор." }}</p>
     <p>Максимум {{ config.max_servers }} целевых VPS{% if config.allow_overlap %}, при замене разрешён один дополнительный{% endif %}.</p>
     <p>Для подтверждения проблемы нужны {{ config.required_ru_probes }} {{ 'проверка VPN из российской сети' if config.required_ru_probes == 1 else 'проверки VPN из разных российских сетей' }}
       и {{ config.failures }} неудачных циклов подряд.</p>
@@ -80,7 +100,7 @@
       {% if job.spec.addition %}<p>Добавление второго узла. Действующий VPN продолжит работать.</p>{% endif %}
       {% if job.spec.delete_first %}<p class="notice warning">Замена с простоем: старый VPS №{{ job.spec.old.service_id }}, IP {{ job.spec.old.ip }}, будет удалён до заказа нового. Коды доступа и адреса подписок сохраняются. Прямые ссылки потребуется импортировать заново.</p>{% endif %}
       <p>Заявка {{ job.id }}. Создана {{ timestamp(job.created) }}.</p>
-      {% if job.spec.manual %}<p>Причина — запрос администратора.</p>{% endif %}
+      {% if job.spec.automatic %}<p>Причина — правила автоматического восстановления владельца.</p>{% elif job.spec.manual %}<p>Причина — запрос администратора.</p>{% endif %}
       <p>Замена — {{ job.spec.candidate.country|upper }}, площадка №{{ job.spec.candidate.datacenter_id }}.</p>
       {% if job.spec.addition and job.spec.candidate.country == 'nl' %}
       <p class="notice warning">Это ещё один узел в Нидерландах. Другая площадка даёт резерв, но независимость страны и ASN не обеспечена. Подтверждение разрешает такое размещение.</p>

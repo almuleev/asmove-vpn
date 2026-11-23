@@ -146,6 +146,8 @@ def load_config(path):
 
 
 SCHEMA = """
+CREATE TABLE IF NOT EXISTS automation_policy (id INTEGER PRIMARY KEY CHECK(id=1), value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS automation_observations (node TEXT PRIMARY KEY, since_at INTEGER NOT NULL, last_at INTEGER NOT NULL, failures INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS nodes (id TEXT PRIMARY KEY, failures INTEGER NOT NULL DEFAULT 0,
     observed_at INTEGER NOT NULL DEFAULT 0, state TEXT NOT NULL DEFAULT 'unknown', evidence TEXT NOT NULL DEFAULT '{}',
     incident TEXT NOT NULL DEFAULT '');
@@ -195,7 +197,7 @@ class Infrastructure:
         job = db.execute("SELECT node,spec,charge FROM jobs WHERE id=?", (job_id,)).fetchone()
         spec = json.loads(job["spec"])
         candidate = spec["candidate"]
-        message = (f"VPN Node Guard — {LABELS[status]}\nУзел {job['node']}\nЗаявка {job_id}\n"
+        message = (f"ASMove VPN — {LABELS[status]}\nУзел {job['node']}\nЗаявка {job_id}\n"
                    f"Замена — {candidate['country'].upper()}, площадка {candidate['datacenter_id']}\n"
                    f"Тариф {candidate['daily_cost']} USD/сутки")
         if spec.get("delete_first"):
@@ -313,6 +315,8 @@ class Infrastructure:
                 for job in db.execute("SELECT id FROM jobs WHERE node=? AND status IN ('pending','approved') "
                                       "AND COALESCE(json_extract(spec,'$.manual'),0)=0", (node_id,)).fetchall():
                     self.update(db, job["id"], "recovered", reserved=0)
+            from .automation import record
+            record(db, node_id, evidence, config, timestamp())
             return state
 
 
@@ -348,9 +352,12 @@ class Worker:
         for probe in self.config.get("probes", []):
             result = {"observer_ok": False, "vpn_ok": False}
             try:
-                reply = execute(probe["command"], {"node": node}, timeout=15)
+                reply = execute(probe["command"], {"node": node}, timeout=45)
                 if type(reply.get("observer_ok")) is bool and type(reply.get("vpn_ok")) is bool:
                     result = {key: reply[key] for key in result}
+                    total = reply.get("targets_total", 0)
+                    if type(total) is int and 0 <= total <= 3:
+                        result["targets_total"] = total
             except (OSError, ValueError, subprocess.TimeoutExpired, InfrastructureError):
                 pass
             evidence["probes"].append({"id": probe["id"], "region": probe["region"], **result})
@@ -448,11 +455,11 @@ class Worker:
                     raise InfrastructureError("fresh_failed_probe_required")
                 self.store.check_replacement_slot(db, excluding=job_id)
                 self.store.update(db, job_id, "ordering")
-            server_id = self.provider.order("nodeguard-" + job_id, spec["candidate"])
+            server_id = self.provider.order("asmove-" + job_id, spec["candidate"])
             self.status(job_id, "provisioning", service_id=server_id)
             return
         if job["status"] in ("ordering", "uncertain"):
-            server_id = self.provider.reconcile("nodeguard-" + job_id)
+            server_id = self.provider.reconcile("asmove-" + job_id)
             if server_id:
                 self.status(job_id, "provisioning", service_id=server_id, error="")
             elif timestamp() - job["updated"] > config["setup_timeout"]:
@@ -467,7 +474,7 @@ class Worker:
             return
         if job["status"] == "provisioning":
             server = self.provider.server(job["service_id"])
-            if server.get("name") != "nodeguard-" + job_id:
+            if server.get("name") != "asmove-" + job_id:
                 raise InfrastructureError("provider_identity_mismatch")
             if server.get("status") != "active":
                 return
@@ -550,7 +557,7 @@ class Worker:
                     # Preserve the incident even while the provider API is unavailable.
                     with self.store.write() as db:
                         db.execute("INSERT OR IGNORE INTO notifications(id,message) VALUES (?,?)",
-                                   (node["id"] + ":offer_unavailable", "VPN Node Guard — нет доступного тарифа для " + node["id"]))
+                                   (node["id"] + ":offer_unavailable", "ASMove VPN — нет доступного тарифа для " + node["id"]))
         for addition in config.get("additions", []):
             with connect(self.store.path) as db:
                 requested = db.execute("SELECT request_id FROM manual_requests WHERE node=?", (addition["id"],)).fetchone()
@@ -564,7 +571,7 @@ class Worker:
                 except (ProviderError, InfrastructureError):
                     with self.store.write() as db:
                         db.execute("INSERT OR IGNORE INTO notifications(id,message) VALUES (?,?)",
-                                   (node["id"] + ":offer_unavailable", "VPN Node Guard — не удалось получить предложение для " + node["id"]))
+                                   (node["id"] + ":offer_unavailable", "ASMove VPN — не удалось получить предложение для " + node["id"]))
         with connect(self.store.path) as db:
             jobs = [dict(row) for row in db.execute("SELECT * FROM jobs WHERE status IN "
                                                    "('approved','ordering','uncertain','provisioning','verifying','publishing')")]
@@ -621,6 +628,7 @@ def register_routes(app, settings, auth, page, read_form, require_csrf):
         session = authorize(request)
         infrastructure = Infrastructure(settings.data_dir, settings.infrastructure_config)
         try:
+            infrastructure.initialize()
             config, nodes, jobs, audit = infrastructure.overview()
         except (OSError, ValueError, KeyError, sqlite3.Error):
             return page(request, "error.html", 503, message="Проверьте настройки управления серверами.")
@@ -642,13 +650,16 @@ def register_routes(app, settings, auth, page, read_form, require_csrf):
                 if db.execute("SELECT 1 FROM sqlite_master WHERE name='replacement_checks'").fetchone():
                     checks = {row["node"]: {**dict(row), "result": json.loads(row["result"])}
                               for row in db.execute("SELECT * FROM replacement_checks")}
+        from .automation import read as read_automation
+        with connect(infrastructure.path) as db:
+            automation_policy = read_automation(db)
         current = timestamp()
         configured = {node['id']: node for node in config['nodes']}
         for node in nodes:
             node.update(ip=configured.get(node['id'], {}).get('ip'),port=configured.get(node['id'], {}).get('port'))
             if current-node['observed_at'] > config['probe_max_age']:
                 node['state'] = 'unknown'
-        return page(request, "infrastructure.html", config=config, nodes=nodes, jobs=jobs, audit=audit, replacement_checks=checks,
+        return page(request, "infrastructure.html", automation=automation_policy, config=config, nodes=nodes, jobs=jobs, audit=audit, replacement_checks=checks,
                     queued_notifications=queued_notifications,
                     ntfy_state=ntfy_state, ntfy_url=ntfy_url,
                     labels=LABELS, operation_error=operation_error, csrf=auth.sign("session", session))
@@ -658,7 +669,16 @@ def register_routes(app, settings, auth, page, read_form, require_csrf):
         require_csrf(request, form, "session", session)
         try:
             control = Infrastructure(settings.data_dir, settings.infrastructure_config)
-            if action == "request":
+            if action == "automation":
+                from .automation import save
+                try:
+                    policy = {"enabled": form.get("enabled") == "yes", "trigger": form.get("trigger", "vpn_failed")}
+                    for key in ("failures", "failure_seconds", "cooldown_seconds", "max_per_day"):
+                        policy[key] = int(form.get(key, ""))
+                    save(control, policy, accept_downtime=form.get("accept_automatic_downtime") == "yes")
+                except ValueError:
+                    raise InfrastructureError("Проверьте пороги и подтвердите автоматическое удаление и простой.") from None
+            elif action == "request":
                 control.request_replacement(job_id)
             elif action == "add":
                 control.request_addition(job_id)

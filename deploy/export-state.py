@@ -32,7 +32,7 @@ def encrypt_bundle(content, recipient, output):
     if output.exists() or output.is_symlink():
         raise FileExistsError('Output already exists; choose a new backup filename')
     output.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(dir=output.parent, prefix='.nodeguard-export-') as temporary:
+    with tempfile.TemporaryDirectory(dir=output.parent, prefix='.asmove-export-') as temporary:
         staged = Path(temporary)/'backup.age'
         subprocess.run(['age', '-r', recipient, '-o', str(staged)], input=content, check=True, capture_output=True, timeout=120)
         staged.chmod(0o600)
@@ -85,6 +85,9 @@ def main():
         for path in Path('/etc/access-site').iterdir():
             if path.is_file() and not path.is_symlink() and path.suffix in ('.env', '.json'):
                 files['etc-access-site/'+path.name] = path.read_bytes()
+        from app.automation import read as read_automation
+        with connect(control.path, 'ro') as db:
+            files['automation-policy.json'] = json.dumps(read_automation(db)).encode()
         files['infrastructure.json'] = settings.infrastructure_config.read_bytes()
         for path in lc.CONTROL.iterdir():
             if path.is_file() and not path.is_symlink():

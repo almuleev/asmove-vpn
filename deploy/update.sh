@@ -6,6 +6,16 @@ require_root
 exec 9>/run/lock/access-site-deploy.lock
 flock -n 9
 load_site
+# Do not change journal prefixes, policy or executors during an unfinished job.
+/opt/access-site/current/venv/bin/python - <<'PY'
+import os, sqlite3
+from pathlib import Path
+path = Path(os.environ['SITE_DATA_DIR']) / 'infrastructure.sqlite3'
+if path.exists():
+    with sqlite3.connect(path.as_uri() + '?mode=ro', uri=True) as db:
+        if db.execute("SELECT 1 FROM jobs WHERE status NOT IN ('ready','cancelled','expired','simulated','recovered') LIMIT 1").fetchone():
+            raise SystemExit('Finish or cancel the current replacement before updating')
+PY
 old=$(readlink -f /opt/access-site/current)
 expected='{"status":"ok"}'
 if /usr/local/sbin/access-site status | grep -q '"ready": false'; then
@@ -24,9 +34,9 @@ if ! /usr/local/sbin/access-site init || ! systemctl restart access-site.service
     echo 'Update rolled back.' >&2
     exit 1
 fi
-if [[ -d /opt/nodeguard-control/deploy ]]; then
+if [[ -d /opt/asmove-control/deploy ]]; then
     for file in vpn-lifecycle.py delete-first.py vpn_recovery.py lifecycle-result.py xui_setup.py install-3x-ui-remote.py vpn-probe.py notification-proxy.py tcp-relay.py vpn-tls.py export-state.py; do
-        install -m 0644 "$root/deploy/$file" "/opt/nodeguard-control/deploy/$file"
+        install -m 0644 "$root/deploy/$file" "/opt/asmove-control/deploy/$file"
     done
     if [[ -f /var/lib/access-site/control/notification-targets.json ]]; then
         install -m 0644 "$root/deploy/systemd/access-site-notification-proxy.service" /etc/systemd/system/

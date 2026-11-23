@@ -200,7 +200,7 @@ class MigrationTests(unittest.TestCase):
         stream = json.loads(created[0]['streamSettings'])
         self.assertEqual(stream['security'], 'tls')
         self.assertNotIn('realitySettings', stream)
-        self.assertEqual(stream['tlsSettings']['certificates'][0]['certificateFile'], '/etc/nodeguard-vpn-tls/fullchain.pem')
+        self.assertEqual(stream['tlsSettings']['certificates'][0]['certificateFile'], '/etc/asmove-vpn-tls/fullchain.pem')
         self.assertEqual(parse_qs(urlsplit(details['link']).query)['fp'], ['ios'])
 
     def test_restore_installs_new_ip_certificate_before_starting_restored_panel(self):

@@ -34,7 +34,7 @@ def build(repository=None):
     (OUTPUT / 'index.html').write_text(landing, encoding='utf-8')
     (OUTPUT / '.nojekyll').write_text('')
     docs = list((ROOT / 'docs').glob('*.md'))
-    docs += [ROOT / p for p in ['README.md', 'CONTRIBUTING.md', 'SECURITY.md', 'NOTICE.md', 'CHANGELOG.md']]
+    docs += [ROOT / p for p in ['README.md', 'README.en.md', 'CONTRIBUTING.md', 'SECURITY.md', 'NOTICE.md', 'CHANGELOG.md']]
     for source in docs:
         rel = source.relative_to(ROOT).with_suffix('.html')
         destination = OUTPUT / rel
@@ -57,7 +57,7 @@ def build(repository=None):
             return 'href="' + html.escape(target, quote=True) + '"'
         content = re.sub(r'href="([^"]+)"', rewrite, content)
         title = html.escape(source.stem)
-        destination.write_text(f'''<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title} · VPN Node Guard</title><link rel="stylesheet" href="{prefix}site.css"></head><body><header class="header wrap"><a class="brand" href="{prefix}index.html">VPN Node Guard</a><nav><a href="{prefix}docs/INSTALL.html">Установка</a><a href="{prefix}README.html">README</a></nav></header><main class="document wrap">{content}</main><footer class="wrap"><a href="{prefix}index.html">На главную</a><a href="{prefix}SECURITY.html">Безопасность</a></footer></body></html>''', encoding='utf-8')
+        destination.write_text(f'''<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title} · ASMove VPN</title><link rel="stylesheet" href="{prefix}site.css"></head><body><header class="header wrap"><a class="brand" href="{prefix}index.html">ASMove VPN</a><nav><a href="{prefix}docs/QUICKSTART.html">Установка</a><a href="{prefix}README.html">README</a></nav></header><main class="document wrap">{content}</main><footer class="wrap"><a href="{prefix}index.html">На главную</a><a href="{prefix}SECURITY.html">Безопасность</a></footer></body></html>''', encoding='utf-8')
     (OUTPUT / 'source.html').write_text('''<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Исходники</title><link rel="stylesheet" href="site.css"></head><body><main class="document wrap"><h1>Исходники проекта</h1><p>Это локальная сборка до публикации GitHub-репозитория. Файлы находятся в локальной папке проекта. Для внешних ссылок пересоберите страницу с --repository https://github.com/OWNER/REPO после выбора настоящего адреса.</p><a href="index.html">На главную</a></main></body></html>''', encoding='utf-8')
     print('Pages artifact: ' + str(OUTPUT))
 

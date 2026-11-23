@@ -10,7 +10,7 @@ try:
     stage = sys.argv[1]
     if not re.fullmatch(r"[a-f0-9]{32}", job) or stage not in {"provisioning", "verifying", "publishing"}:
         raise ValueError("Invalid request")
-    path = Path("/var/lib/nodeguard-lifecycle-results") / (job + "-" + stage + ".json")
+    path = Path("/var/lib/asmove-lifecycle-results") / (job + "-" + stage + ".json")
     result = json.loads(path.read_text()) if path.is_file() else {"ready": False, "published": False, "pending": True}
     print(json.dumps(result))
 except (ValueError, KeyError, OSError, IndexError):

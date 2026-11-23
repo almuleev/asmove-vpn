@@ -22,7 +22,7 @@ import vpn_recovery as recovery
 
 
 def lifecycle_module():
-    spec=importlib.util.spec_from_file_location('nodeguard_lifecycle',Path(__file__).with_name('vpn-lifecycle.py'))
+    spec=importlib.util.spec_from_file_location('asmove_lifecycle',Path(__file__).with_name('vpn-lifecycle.py'))
     module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module);return module
 
 
@@ -57,6 +57,9 @@ class Operations:
             raise InfrastructureError('old_service_identity_mismatch')
         if server.get('server-plan',{}).get('id')!=json.loads(job['spec'])['candidate']['plan_id']:
             raise InfrastructureError('old_tariff_changed')
+
+    def automation_probe(self,node):
+        return Worker(self.control,provider=self.provider).probe(node)
 
     def latest(self,node):
         return recovery.PRIVATE/'backups'/node['id']/(str(node['service_id'])+'.tar.gz')
@@ -187,6 +190,15 @@ def main():
         control=Infrastructure(settings.data_dir,settings.infrastructure_config);control.initialize()
         provider=Vdsina(config.get('api_host','userapi.vdsina.com'),direct=True)
         ops=Operations(settings,control,provider,lifecycle_module());runner=DeleteFirstRunner(control,provider,ops)
+        from app.automation import maybe_start
+        try:
+            maybe_start(control,ops)
+        except Exception:
+            # Keep monitoring and existing recovery alive without leaking provider output.
+            with control.write() as db:
+                db.execute('INSERT OR IGNORE INTO notifications VALUES (?,?,0)',
+                           ('auto-preflight:'+str(timestamp()//300),
+                            'ASMove VPN: автозамена остановлена до удаления. Проверьте API, архив и настройки.'))
         with connect(control.path,'ro') as db:
             jobs=[dict(r) for r in db.execute('SELECT * FROM jobs WHERE json_extract(spec,\'$.delete_first\')=1')]
             checks={r['node']:dict(r) for r in db.execute('SELECT * FROM replacement_checks')}

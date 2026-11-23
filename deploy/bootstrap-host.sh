@@ -41,12 +41,12 @@ with p.open('a') as f:
 PY
 bash "$root/deploy/https.sh"
 systemctl enable --now "access-site-cert-renew@${https_host}.timer"
-install -d -m 0700 /var/lib/access-site/control /var/lib/nodeguard-delete-first
+install -d -m 0700 /var/lib/access-site/control /var/lib/asmove-delete-first
 if [[ ! -f /var/lib/access-site/control/id_ed25519 ]]; then
-    ssh-keygen -q -t ed25519 -N '' -C nodeguard-control -f /var/lib/access-site/control/id_ed25519
+    ssh-keygen -q -t ed25519 -N '' -C asmove-control -f /var/lib/access-site/control/id_ed25519
 fi
-if [[ ! -f /var/lib/nodeguard-delete-first/backup_ed25519 ]]; then
-    ssh-keygen -q -t ed25519 -N '' -C nodeguard-backup -f /var/lib/nodeguard-delete-first/backup_ed25519
+if [[ ! -f /var/lib/asmove-delete-first/backup_ed25519 ]]; then
+    ssh-keygen -q -t ed25519 -N '' -C asmove-backup -f /var/lib/asmove-delete-first/backup_ed25519
 fi
 systemctl restart access-site.service
 check_service "$authority" '{"status":"ok"}'

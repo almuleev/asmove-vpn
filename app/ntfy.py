@@ -24,7 +24,7 @@ class Ntfy:
         self.host, self.port, self.topic, self.token = parsed.hostname, parsed.port or 443, topic, token
 
     def send(self, message, *, click=None, priority=3):
-        payload = {"topic": self.topic, "title": "VPN Node Guard", "message": message, "priority": priority}
+        payload = {"topic": self.topic, "title": "ASMove VPN", "message": message, "priority": priority}
         if click:
             payload["click"] = click
         headers = {"Content-Type": "application/json; charset=utf-8"}

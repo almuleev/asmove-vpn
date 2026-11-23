@@ -137,7 +137,7 @@ class ReplacementTests(unittest.TestCase):
 
     def test_same_ip_and_provisioning_failure_resume_existing_service(self):
         self.to_order(); self.tick()
-        self.api.server.return_value={'id':20,'name':'nodeguard-'+self.raw()['id'],'status':'active'}
+        self.api.server.return_value={'id':20,'name':'asmove-'+self.raw()['id'],'status':'active'}
         self.api.address.return_value='1.1.1.1'
         self.assertEqual(self.tick(),'attention'); self.ops.provision.assert_not_called()
         self.store.decide(self.raw()['id'],'resume'); self.api.address.return_value='8.8.8.8'
@@ -148,7 +148,7 @@ class ReplacementTests(unittest.TestCase):
 
     def test_complete_rehearsal_orders_once_verifies_before_publication_and_releases_lock(self):
         self.to_order(); self.assertEqual(self.tick(),'provisioning')
-        self.api.server.return_value={'id':20,'name':'nodeguard-'+self.raw()['id'],'status':'active'}
+        self.api.server.return_value={'id':20,'name':'asmove-'+self.raw()['id'],'status':'active'}
         self.api.address.return_value='8.8.8.8'
         self.assertEqual(self.tick(),'verifying'); self.ops.publish.assert_not_called()
         self.ops.verify.return_value=False
@@ -269,7 +269,7 @@ class RecoveryArchiveTests(unittest.TestCase):
         with sqlite3.connect(self.root/'x-ui.db') as db:
             stream = {'network': 'xhttp', 'security': 'tls', 'tlsSettings': {
                 'settings': {'serverName': '1.1.1.1'},
-                'certificates': [{'certificateFile': '/etc/nodeguard-vpn-tls/fullchain.pem'}]}}
+                'certificates': [{'certificateFile': '/etc/asmove-vpn-tls/fullchain.pem'}]}}
             db.execute('UPDATE inbounds SET stream_settings=?', (json.dumps(stream),))
             recovery.adapt_database(db, '1.1.1.1', '8.8.8.8', 12345)
             actual = json.loads(db.execute('SELECT stream_settings FROM inbounds').fetchone()[0])

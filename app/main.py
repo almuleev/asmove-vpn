@@ -448,7 +448,7 @@ def create_app(settings=None):
         if isinstance(panel, PanelGroup) and panel.manages(account):
             links.extend(panel.additional_links(account))
         encoded = base64.b64encode(("\n".join(dict.fromkeys(links)) + "\n").encode())
-        headers = {"Profile-Update-Interval": "1", "Content-Disposition": 'inline; filename="nodeguard.txt"'}
+        headers = {"Profile-Update-Interval": "1", "Content-Disposition": 'inline; filename="asmove.txt"'}
         if account["access_until"]:
             headers["Subscription-Userinfo"] = "expire=" + str(account["access_until"])
         return Response(encoded, media_type="text/plain", headers=headers)

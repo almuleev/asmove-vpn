@@ -177,7 +177,7 @@ class InfrastructureTests(unittest.TestCase):
         job_id = self.incident()
         self.store.decide(job_id, "approve")
         self.worker.advance(self.raw_job())
-        self.provider.server.return_value = {"id": 20, "name": "nodeguard-" + job_id, "status": "active"}
+        self.provider.server.return_value = {"id": 20, "name": "asmove-" + job_id, "status": "active"}
         self.provider.address.return_value = "8.8.8.8"
         with patch("app.infrastructure.execute", return_value={"ready": True, "port": 8080}) as hook:
             self.worker.advance(self.raw_job())
@@ -388,9 +388,9 @@ class VdsinaTests(unittest.TestCase):
     def test_native_currency_and_order_payload(self):
         api = Vdsina()
         with patch.object(api,'quote',return_value='0.07'), patch.object(api, "request", return_value={"id": 18}) as request:
-            self.assertEqual(api.order("nodeguard-job", {"plan_id": 1, "datacenter_id": 2,
+            self.assertEqual(api.order("asmove-job", {"plan_id": 1, "datacenter_id": 2,
                                                        "template_id": 3, "ssh_key_id": 4}), 18)
-        request.assert_called_once_with("POST", "server", {"name": "nodeguard-job", "datacenter": 2,
+        request.assert_called_once_with("POST", "server", {"name": "asmove-job", "datacenter": 2,
                                                            "server-plan": 1, "template": 3, "ssh-key": 4})
 
     def test_reconciliation_refuses_ambiguous_orders(self):

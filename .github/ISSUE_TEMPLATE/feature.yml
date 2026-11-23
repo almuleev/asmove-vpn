@@ -1,0 +1,16 @@
+name: Улучшение / Feature request
+description: Какую задачу хотите упростить?
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какая задача сейчас неудобна? / What problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Как должно работать? / Proposed behavior
+    validations:
+      required: true

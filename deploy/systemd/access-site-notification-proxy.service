@@ -6,7 +6,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/python3 /opt/nodeguard-control/deploy/notification-proxy.py --telegram-only
+ExecStart=/usr/bin/python3 /opt/asmove-control/deploy/notification-proxy.py --telegram-only
 Restart=always
 RestartSec=3
 NoNewPrivileges=yes

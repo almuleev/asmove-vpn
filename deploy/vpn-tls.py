@@ -13,9 +13,9 @@ import threading
 import time
 import urllib.request
 
-STATE = Path('/var/lib/nodeguard-vpn-tls')
-CERT = Path('/etc/nodeguard-vpn-tls')
-PROGRAM = '/usr/local/lib/nodeguard/vpn-tls.py'
+STATE = Path('/var/lib/asmove-vpn-tls')
+CERT = Path('/etc/asmove-vpn-tls')
+PROGRAM = '/usr/local/lib/asmove/vpn-tls.py'
 VERSION = '3.1.7'
 SOURCE_SHA256 = '35bf6b947478666be137f938f77c5089954f120798220e6fff390949c5ea5692'
 
@@ -46,10 +46,10 @@ def install(ip):
     timer = ('[Unit]\nDescription=Check VPN certificate twice daily\n[Timer]\n'
              'OnCalendar=*-*-* 00,12:15:00\nRandomizedDelaySec=20min\nPersistent=true\n'
              'OnBootSec=5min\n[Install]\nWantedBy=timers.target\n')
-    Path('/etc/systemd/system/nodeguard-vpn-tls.service').write_text(unit)
-    Path('/etc/systemd/system/nodeguard-vpn-tls.timer').write_text(timer)
+    Path('/etc/systemd/system/asmove-vpn-tls.service').write_text(unit)
+    Path('/etc/systemd/system/asmove-vpn-tls.timer').write_text(timer)
     run(['systemctl', 'daemon-reload'])
-    run(['systemctl', 'enable', '--now', 'nodeguard-vpn-tls.timer'])
+    run(['systemctl', 'enable', '--now', 'asmove-vpn-tls.timer'])
 
 
 class Challenge(http.server.SimpleHTTPRequestHandler):

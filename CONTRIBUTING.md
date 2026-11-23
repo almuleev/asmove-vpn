@@ -2,8 +2,8 @@
 
 ## Сообщить об ошибке
 
-После публикации откройте вкладку Issues этого нового репозитория → New issue →
-Bug report. До публикации используйте локальный [шаблон](.github/ISSUE_TEMPLATE/bug_report.md).
+Откройте [форму ошибки](https://github.com/almuleev/asmove-vpn/issues/new/choose).
+Для вопросов используйте [Discussions](https://github.com/almuleev/asmove-vpn/discussions).
 Укажите версию/commit, ОС, этап, ожидаемое и фактическое поведение и минимальные
 обезличенные шаги. Не прикладывайте базы, env, VPN URI, URL подписки, коды, IP
 пользователей или полный приватный журнал. Для уязвимостей — [SECURITY](SECURITY.md).

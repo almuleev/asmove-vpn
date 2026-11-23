@@ -13,7 +13,7 @@ import tempfile
 import time
 
 MAX_ARCHIVE = 64 * 1024 * 1024
-PRIVATE = Path('/var/lib/nodeguard-delete-first')
+PRIVATE = Path('/var/lib/asmove-delete-first')
 
 
 def atomic(path, data, mode=0o600):
@@ -74,7 +74,7 @@ def validate_archive(data, node=None):
 CAPTURE = r'''import base64,json,sqlite3,tempfile
 from contextlib import closing
 from pathlib import Path
-with tempfile.TemporaryDirectory(prefix='nodeguard-backup-') as directory:
+with tempfile.TemporaryDirectory(prefix='asmove-backup-') as directory:
  p=Path(directory)/'x-ui.db'
  with closing(sqlite3.connect('file:/etc/x-ui/x-ui.db?mode=ro',uri=True)) as source, closing(sqlite3.connect(str(p))) as target:
   source.backup(target)
@@ -95,10 +95,10 @@ def capture(lifecycle,node,settings,store):
     args=lifecycle.ssh_args(node['ip'],node['service_id'])
     args[args.index('StrictHostKeyChecking=accept-new')]='StrictHostKeyChecking=yes'
     args[args.index('-i')+1]=str(PRIVATE/'backup_ed25519')
-    raw=lifecycle.run([*args,'root@'+node['ip'],'nodeguard-recovery-backup'],timeout=90)
+    raw=lifecycle.run([*args,'root@'+node['ip'],'asmove-recovery-backup'],timeout=90)
     if len(raw)>MAX_ARCHIVE*2:raise ValueError('remote_backup_too_large')
     result=json.loads(raw);files={name:base64.b64decode(value,validate=True) for name,value in result['files'].items()}
-    with tempfile.TemporaryDirectory(prefix='nodeguard-cabinet-') as directory:
+    with tempfile.TemporaryDirectory(prefix='asmove-cabinet-') as directory:
         path=Path(directory)/'accounts.sqlite3';revision=snapshot(store,path);files['accounts.sqlite3']=path.read_bytes()
     config=json.loads((settings.data_dir/'probes/notifications.json').read_text())
     probe_uuid=config['outbounds'][0]['settings']['vnext'][0]['users'][0]['id']
@@ -111,7 +111,7 @@ def capture(lifecycle,node,settings,store):
 
 def backup_program():
     return ("import os,sys\nos.umask(0o077)\n"
-            "if os.environ.get('SSH_ORIGINAL_COMMAND')!='nodeguard-recovery-backup':sys.exit(1)\n"+CAPTURE).encode()
+            "if os.environ.get('SSH_ORIGINAL_COMMAND')!='asmove-recovery-backup':sys.exit(1)\n"+CAPTURE).encode()
 
 
 def install_backup_endpoint(lifecycle,ip,service_id):
@@ -124,14 +124,14 @@ def install_backup_endpoint(lifecycle,ip,service_id):
 from pathlib import Path
 os.umask(0o077)
 r=json.load(sys.stdin)
-path=Path('/usr/local/lib/nodeguard/vpn-backup.py');path.parent.mkdir(mode=0o755,parents=True,exist_ok=True)
+path=Path('/usr/local/lib/asmove/vpn-backup.py');path.parent.mkdir(mode=0o755,parents=True,exist_ok=True)
 path.write_bytes(base64.b64decode(r['program'],validate=True));path.chmod(0o600)
 auth=Path('/root/.ssh/authorized_keys');auth.parent.mkdir(mode=0o700,exist_ok=True)
 key=r['key'];identity=key.split()[1]
 lines=auth.read_text().splitlines() if auth.exists() else []
 lines=[line for line in lines if identity not in line.split()]
-lines.append('restrict,command="/usr/bin/python3 /usr/local/lib/nodeguard/vpn-backup.py" '+key)
-temp=auth.with_name('authorized_keys.nodeguard-new');temp.write_text('\n'.join(lines)+'\n');temp.chmod(0o600);os.replace(temp,auth)
+lines.append('restrict,command="/usr/bin/python3 /usr/local/lib/asmove/vpn-backup.py" '+key)
+temp=auth.with_name('authorized_keys.asmove-new');temp.write_text('\n'.join(lines)+'\n');temp.chmod(0o600);os.replace(temp,auth)
 '''
     import shlex
     lifecycle.run([*lifecycle.ssh_args(ip,service_id),'root@'+ip,'python3 -c '+shlex.quote(program)],
@@ -181,7 +181,7 @@ import base64,json,os,sqlite3,subprocess,sys
 from contextlib import closing
 from pathlib import Path
 request=json.load(sys.stdin);job=request['job'];digest=request['digest'];port=request['panel_port'];old=request['old_ip'];new=request['new_ip']
-marker=Path('/var/lib/nodeguard-restore-'+job+'.json')
+marker=Path('/var/lib/asmove-restore-'+job+'.json')
 saved=None
 if marker.exists():
  saved=json.loads(marker.read_text())

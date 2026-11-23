@@ -30,9 +30,9 @@ from app.xui import Panel, PanelSettings, PanelError
 from xui_setup import Setup
 
 CONTROL = Path("/var/lib/access-site/control")
-PRIVATE = Path("/var/lib/nodeguard-lifecycle")
-PUBLIC = Path("/var/lib/nodeguard-lifecycle-results")
-PROBES = Path("/var/lib/nodeguard-lifecycle-probes")
+PRIVATE = Path("/var/lib/asmove-lifecycle")
+PUBLIC = Path("/var/lib/asmove-lifecycle-results")
+PROBES = Path("/var/lib/asmove-lifecycle-probes")
 TRANSPORT_POLICY = Path("/etc/access-site/vpn-transport-policy.json")
 ENV = Path("/etc/access-site/site.env")
 UNIT = Path("/etc/systemd/system/access-site-eu-panel.service")
@@ -101,7 +101,7 @@ def ensure_transport_certificate(job, ip):
     program = """import base64,json,subprocess,sys
 from pathlib import Path
 r=json.load(sys.stdin)
-p=Path('/usr/local/lib/nodeguard/vpn-tls.py');p.parent.mkdir(mode=0o755,parents=True,exist_ok=True)
+p=Path('/usr/local/lib/asmove/vpn-tls.py');p.parent.mkdir(mode=0o755,parents=True,exist_ok=True)
 p.write_bytes(base64.b64decode(r['source'],validate=True));p.chmod(0o700)
 result=subprocess.run(['/usr/bin/python3',str(p),'--install','--ip',r['ip']],capture_output=True,timeout=350)
 if result.returncode:raise RuntimeError('VPN certificate setup failed: '+result.stderr.decode()[-1000:])
@@ -116,7 +116,7 @@ def notification_target(node_id, ip, service_id):
     if not path.exists():
         return
     values = json.loads(path.read_text())
-    values[node_id] = {"ip": ip, "alias": "nodeguard-service-" + str(service_id)}
+    values[node_id] = {"ip": ip, "alias": "asmove-service-" + str(service_id)}
     save(path, values, public=True)
 
 
@@ -127,7 +127,7 @@ def ssh_args(ip, service_id):
     # A previously pinned key for the same service is never overwritten.
     return ["ssh", "-T", "-i", str(CONTROL / "id_ed25519"), "-o", "IdentitiesOnly=yes",
             "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=accept-new", "-o",
-            "UserKnownHostsFile=" + str(CONTROL / "known_hosts"), "-o", "HostKeyAlias=nodeguard-service-" + str(service_id),
+            "UserKnownHostsFile=" + str(CONTROL / "known_hosts"), "-o", "HostKeyAlias=asmove-service-" + str(service_id),
             "-o", "ConnectTimeout=8", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=3"]
 
 
@@ -195,8 +195,8 @@ def configure_transport(panel, details):
                 raise ValueError('XHTTP requires TLS')
             stream = {'network': 'xhttp', 'security': 'tls', 'xhttpSettings': policy['xhttpSettings'],
                       'tlsSettings': {'minVersion': '1.2', 'maxVersion': '1.3', 'alpn': ['h2', 'http/1.1'],
-                       'certificates': [{'certificateFile': '/etc/nodeguard-vpn-tls/fullchain.pem',
-                                         'keyFile': '/etc/nodeguard-vpn-tls/privkey.pem', 'oneTimeLoading': False}],
+                       'certificates': [{'certificateFile': '/etc/asmove-vpn-tls/fullchain.pem',
+                                         'keyFile': '/etc/asmove-vpn-tls/privkey.pem', 'oneTimeLoading': False}],
                        'settings': {'serverName': details['ip'], 'fingerprint': 'ios', 'allowInsecure': False}}}
         panel.request("inbounds/add", {"remark": remark, "port": port, "protocol": "vless", "enable": True,
             "settings": json.dumps({"clients": [], "decryption": "none", "encryption": "none"}),
@@ -276,7 +276,7 @@ def unit_for(details, service_id, local_port=46065):
     args[args.index("StrictHostKeyChecking=accept-new")] = "StrictHostKeyChecking=yes"
     args += ["-N", "-o", "ExitOnForwardFailure=yes", "-L",
              f"127.0.0.1:{local_port}:127.0.0.1:{details['panel_port']}", "root@" + details["ip"]]
-    return ("[Unit]\nDescription=VPN Node Guard VPN panel SSH connection\nAfter=network-online.target\n"
+    return ("[Unit]\nDescription=ASMove VPN VPN panel SSH connection\nAfter=network-online.target\n"
             "Wants=network-online.target\n[Service]\nUser=root\nExecStart=" + shlex.join(args) +
             "\nRestart=always\nRestartSec=5\nNoNewPrivileges=true\nProtectSystem=strict\nProtectHome=true\n"
             "PrivateTmp=true\nCapabilityBoundingSet=\n[Install]\nWantedBy=multi-user.target\n")
@@ -300,7 +300,7 @@ def publish(job, details, directory):
     old_unit = UNIT.read_text()
     old_notifications = (store.directory / "probes/notifications.json").read_text()
     backup = directory / ("before-publication-" + str(time.time_ns()) + ".sqlite3")
-    timers = [name for name in ("access-site-sync.timer", "nodeguard-snapshot-upload.timer",
+    timers = [name for name in ("access-site-sync.timer", "asmove-snapshot-upload.timer",
               "access-site-reminders.timer", "access-site-events.timer")
               if subprocess.run(["systemctl", "is-active", "--quiet", name]).returncode == 0]
     manifest = {"committed": False, "backup": str(backup), "env": original, "unit": old_unit,
@@ -362,7 +362,7 @@ def publish(job, details, directory):
         save(directory / "publication.json", manifest)
     finally:
         recover_directory(directory, store)
-    background = ['nodeguard-snapshot-upload.service']
+    background = ['asmove-snapshot-upload.service']
     if getattr(Settings.from_env(), 'replication_enabled', True):
         background.append('access-site-sync.service')
     background = [unit for unit in background if subprocess.run(
@@ -520,7 +520,7 @@ def main():
                 continue
             try:
                 server = Vdsina(config.get("api_host", "userapi.vdsina.com")).server(job["service_id"])
-                if server.get("name") != "nodeguard-" + job["id"] or server.get("status") != "active":
+                if server.get("name") != "asmove-" + job["id"] or server.get("status") != "active":
                     continue
                 ip = Vdsina.address(server)
                 if job["ip"] and job["ip"] != ip:

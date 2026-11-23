@@ -1,0 +1,33 @@
+name: Ошибка / Bug report
+description: Что не получилось установить или запустить?
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Не прикладывайте токены, базы, ключи, VPN-ссылки и URL подписок. Уязвимости сообщайте приватно через Security.
+  - type: input
+    id: version
+    attributes:
+      label: Версия / commit
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: ОС и этап установки / OS and installation step
+      placeholder: Ubuntu 24.04 amd64, мастер после ввода IP
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Что сделали и что ожидали? / Steps and expected result
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Что произошло? / Actual result
+      description: Только обезличенный текст ошибки и минимальные шаги воспроизведения.
+    validations:
+      required: true
