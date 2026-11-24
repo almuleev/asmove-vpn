@@ -61,6 +61,11 @@ Root SSH and provider token are powerful credentials; read the [operations guide
 
 ## Help and contribute
 
+**Have a question? Write to me — I’m the author of ASMove VPN, and I’ll reply.**
+Questions about installation, setup and ideas are always welcome. No Linux
+experience is required. [Contact me on GitHub Discussions](https://github.com/almuleev/asmove-vpn/discussions/new).
+Discussions are public: please leave out credentials and subscription URLs.
+
 [Ask a question](https://github.com/almuleev/asmove-vpn/discussions),
 [report a bug](https://github.com/almuleev/asmove-vpn/issues/new/choose), or
 [contribute](CONTRIBUTING.md). Clean-install reports and clearer beginner docs are
